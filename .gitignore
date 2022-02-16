@@ -1,0 +1,6 @@
+*.log
+*cache*
+/env
+.venv
+venv
+.idea
