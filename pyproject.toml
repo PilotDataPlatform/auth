@@ -69,8 +69,3 @@ addopts = "--cov logger --cov-report term"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
-
-[[tool.poetry.source]]
-name = "pilot"
-url = "https://git.indocresearch.org/api/v4/groups/pilot/-/packages/pypi/simple"
-default = true
