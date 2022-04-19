@@ -15,7 +15,7 @@ pipeline {
         steps{
           script {
           git branch: "develop",
-              url: 'https://github.com/PilotDataPlatform/auth',
+              url: 'https://github.com/PilotDataPlatform/auth'
             }
         }
     }
@@ -77,7 +77,7 @@ pipeline {
         steps{
           script {
           git branch: "main",
-              url: 'https://github.com/PilotDataPlatform/auth',
+              url: 'https://github.com/PilotDataPlatform/auth'
             }
         }
     }
