@@ -11,18 +11,17 @@ pipeline {
     stages {
 
     stage('Git clone for dev') {
-        when {branch "k8s-dev"}
+        when {branch "develop"}
         steps{
           script {
-          git branch: "k8s-dev",
-              url: 'https://git.indocresearch.org/pilot/service_auth.git',
-              credentialsId: 'lzhao'
+          git branch: "develop",
+              url: 'https://github.com/PilotDataPlatform/auth',
             }
         }
     }
 
     stage('DEV unit test') {
-        when { branch 'k8s-dev' }
+        when { branch 'develop' }
         steps {
             withCredentials([
                 usernamePassword(credentialsId: 'readonly', usernameVariable: 'PIP_USERNAME', passwordVariable: 'PIP_PASSWORD'),
@@ -42,7 +41,7 @@ pipeline {
     }
 
     stage('DEV Build and push image') {
-      when {branch "k8s-dev"}
+      when {branch "develop"}
       steps{
         script {
             withCredentials([usernamePassword(credentialsId:'readonly', usernameVariable: 'PIP_USERNAME', passwordVariable: 'PIP_PASSWORD')]) {
@@ -56,14 +55,14 @@ pipeline {
     }
 
     stage('DEV Remove image') {
-      when {branch "k8s-dev"}
+      when {branch "develop"}
       steps{
         sh "docker rmi $imagename_dev:$commit"
       }
     }
 
     stage('DEV Deploy') {
-      when {branch "k8s-dev"}
+      when {branch "develop"}
       steps{
         build(job: "/VRE-IaC/UpdateAppVersion", parameters: [
           [$class: 'StringParameterValue', name: 'TF_TARGET_ENV', value: 'dev' ],
@@ -74,18 +73,17 @@ pipeline {
     }
 
     stage('Git clone staging') {
-        when {branch "k8s-staging"}
+        when {branch "main"}
         steps{
           script {
-          git branch: "k8s-staging",
-              url: 'https://git.indocresearch.org/pilot/service_auth.git',
-              credentialsId: 'lzhao'
+          git branch: "main",
+              url: 'https://github.com/PilotDataPlatform/auth',
             }
         }
     }
 
     stage('STAGING Building and push image') {
-      when {branch "k8s-staging"}
+      when {branch "main"}
       steps{
         script {
             withCredentials([usernamePassword(credentialsId:'readonly', usernameVariable: 'PIP_USERNAME', passwordVariable: 'PIP_PASSWORD')]) {
@@ -99,14 +97,14 @@ pipeline {
     }
 
     stage('STAGING Remove image') {
-      when {branch "k8s-staging"}
+      when {branch "main"}
       steps{
         sh "docker rmi $imagename_staging:$commit"
       }
     }
 
     stage('STAGING Deploy') {
-      when {branch "k8s-staging"}
+      when {branch "main"}
       steps{
       build(job: "/VRE-IaC/Staging-UpdateAppVersion", parameters: [
         [$class: 'StringParameterValue', name: 'TF_TARGET_ENV', value: 'staging' ],
