@@ -34,4 +34,4 @@ jobs:
       - name: Copy test .env
         run: cp tests/env_test .env
       - name: Run tests
-        run: poetry run python -m pytest tests/
+        run: CONFIG_CENTER_ENABLED=False poetry run python -m pytest tests/

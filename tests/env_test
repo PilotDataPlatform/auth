@@ -1,5 +1,3 @@
-CONFIG_CENTER_ENABLED=False
-
 NEO4J_SERVICE="neo4j_host"
 EMAIL_SERVICE="email_host"
 
