@@ -116,6 +116,7 @@ class Settings(BaseSettings):
 
     INVITE_ATTACHMENT: str = ""
     INVITE_ATTACHMENT_NAME: str = ""
+    INVITATION_URL_LOGIN: str
 
     FLASK: FlaskConfig = FlaskConfig()
 
