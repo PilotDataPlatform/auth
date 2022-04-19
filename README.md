@@ -4,6 +4,8 @@
 [![Python 3.9](https://img.shields.io/badge/python-3.9-green?style=for-the-badge)](https://www.python.org/)
 ![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/pilotdataplatform/auth/Run%20Tests/develop?style=for-the-badge)
 
+test
+
 ## About
 
 Manages user's related data as well as authentication and permissions. Intergrates with Keycloak
