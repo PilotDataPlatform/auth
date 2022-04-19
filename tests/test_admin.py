@@ -24,8 +24,7 @@ test_user = {
     'attributes': {'status': ['active']},
 }
 
-
-def test_get_user_info_by_id(test_client, mocker):
+def test_get_user_info_by_id(test_client, mocker, keycloak_admin_mock):
     mocker.patch('app.resources.keycloak_api.ops_admin.OperationsAdmin.get_user_by_id', return_value=test_user.copy())
     mocker.patch('app.resources.keycloak_api.ops_admin.OperationsAdmin.get_user_realm_roles', return_value=[])
 
@@ -33,7 +32,7 @@ def test_get_user_info_by_id(test_client, mocker):
     assert response.status_code == 200
 
 
-def test_get_user_info_by_username(test_client, mocker):
+def test_get_user_info_by_username(test_client, mocker, keycloak_admin_mock):
     mocker.patch(
         'app.resources.keycloak_api.ops_admin.OperationsAdmin.get_user_by_username', return_value=test_user.copy()
     )
@@ -43,7 +42,7 @@ def test_get_user_info_by_username(test_client, mocker):
     assert response.status_code == 200
 
 
-def test_get_user_info_by_email(test_client, mocker):
+def test_get_user_info_by_email(test_client, mocker, keycloak_admin_mock):
     mocker.patch(
         'app.resources.keycloak_api.ops_admin.OperationsAdmin.get_user_by_email', return_value=test_user.copy()
     )
@@ -53,7 +52,7 @@ def test_get_user_info_by_email(test_client, mocker):
     assert response.status_code == 200
 
 
-def test_get_user_with_admin_role(test_client, mocker):
+def test_get_user_with_admin_role(test_client, mocker, keycloak_admin_mock):
     mocker.patch(
         'app.resources.keycloak_api.ops_admin.OperationsAdmin.get_user_by_email', return_value=test_user.copy()
     )
@@ -67,7 +66,7 @@ def test_get_user_with_admin_role(test_client, mocker):
     assert response.json().get('result', {}).get('role') == 'admin'
 
 
-def test_get_user_with_member_role(test_client, mocker):
+def test_get_user_with_member_role(test_client, mocker, keycloak_admin_mock):
     mocker.patch(
         'app.resources.keycloak_api.ops_admin.OperationsAdmin.get_user_by_email', return_value=test_user.copy()
     )
@@ -81,13 +80,13 @@ def test_get_user_with_member_role(test_client, mocker):
     assert response.json().get('result', {}).get('role') == 'member'
 
 
-def test_get_user_info_missing_params(test_client):
+def test_get_user_info_missing_params(test_client, keycloak_admin_mock):
     response = test_client.get('/v1/admin/user')
     assert response.status_code == 400
     assert response.json().get('error_msg') == 'One of email, username, user_id is mandetory'
 
 
-def test_get_user_info_user_not_found(test_client, mocker):
+def test_get_user_info_user_not_found(test_client, mocker, keycloak_admin_mock):
 
     m = mocker.patch('app.resources.keycloak_api.ops_admin.OperationsAdmin.get_user_by_id')
     m.side_effect = exceptions.KeycloakGetError
@@ -97,7 +96,7 @@ def test_get_user_info_user_not_found(test_client, mocker):
     assert response.json().get('error_msg') == 'user not found'
 
 
-def test_update_user_attribute(test_client, mocker):
+def test_update_user_attribute(test_client, mocker, keycloak_admin_mock):
     mocker.patch('app.resources.keycloak_api.ops_admin.OperationsAdmin.get_user_id', return_value=test_user.copy())
     mocker.patch(
         'app.resources.keycloak_api.ops_admin.OperationsAdmin.update_user_attributes',
@@ -116,7 +115,7 @@ def test_update_user_attribute(test_client, mocker):
     assert response.json().get('result') == {'test_attribute': 'test_value'}
 
 
-def test_update_user_attribute_missing_username(test_client, mocker):
+def test_update_user_attribute_missing_username(test_client, mocker, keycloak_admin_mock):
     mocker.patch('app.resources.keycloak_api.ops_admin.OperationsAdmin.get_user_id', return_value=test_user.copy())
     mocker.patch(
         'app.resources.keycloak_api.ops_admin.OperationsAdmin.update_user_attributes',
@@ -130,7 +129,7 @@ def test_update_user_attribute_missing_username(test_client, mocker):
     assert response.status_code == 422
 
 
-def test_update_user_attribute_missing_updated_attrs(test_client, mocker):
+def test_update_user_attribute_missing_updated_attrs(test_client, mocker, keycloak_admin_mock):
     mocker.patch('app.resources.keycloak_api.ops_admin.OperationsAdmin.get_user_id', return_value=test_user.copy())
     mocker.patch(
         'app.resources.keycloak_api.ops_admin.OperationsAdmin.update_user_attributes',
@@ -145,7 +144,7 @@ def test_update_user_attribute_missing_updated_attrs(test_client, mocker):
 # keycloak group operation
 
 
-def test_add_user_to_keycloak_new_group(test_client, mocker):
+def test_add_user_to_keycloak_new_group(test_client, mocker, keycloak_admin_mock):
     new_group = {'name': 'test_new_group', 'id': 'test_id'}
     user_id = 'test_user_id'
 
@@ -159,7 +158,7 @@ def test_add_user_to_keycloak_new_group(test_client, mocker):
     assert response.status_code == 200
 
 
-def test_add_user_to_keycloak_existing_group(test_client, mocker):
+def test_add_user_to_keycloak_existing_group(test_client, mocker, keycloak_admin_mock):
     existing_group = {'name': 'test_new_group', 'id': 'test_id'}
     user_id = 'test_user_id'
 
@@ -171,7 +170,7 @@ def test_add_user_to_keycloak_existing_group(test_client, mocker):
     assert response.status_code == 200
 
 
-def test_add_user_to_keycloak_group_missing_payload(test_client):
+def test_add_user_to_keycloak_group_missing_payload(test_client, keycloak_admin_mock):
 
     response = test_client.post(
         '/v1/admin/users/group',
@@ -182,7 +181,7 @@ def test_add_user_to_keycloak_group_missing_payload(test_client):
     assert response.status_code == 422
 
 
-def test_remove_user_to_keycloak_existing_group(test_client, mocker):
+def test_remove_user_to_keycloak_existing_group(test_client, mocker, keycloak_admin_mock):
     existing_group = {'name': 'test_new_group', 'id': 'test_id'}
     user_id = 'test_user_id'
 
@@ -194,7 +193,7 @@ def test_remove_user_to_keycloak_existing_group(test_client, mocker):
     assert response.status_code == 200
 
 
-def test_remove_user_to_keycloak_group_missing_params(test_client):
+def test_remove_user_to_keycloak_group_missing_params(test_client, keycloak_admin_mock):
 
     response = test_client.delete('/v1/admin/users/group', params={})
     assert response.status_code == 422
@@ -220,7 +219,7 @@ def create_test_user_list(size=10):
     return user_list
 
 
-def test_list_users_under_roles_pagination_1(test_client, mocker):
+def test_list_users_under_roles_pagination_1(test_client, mocker, keycloak_admin_mock):
     num_of_user = 20
     page_size = 10
     users = create_test_user_list(num_of_user)
@@ -239,7 +238,7 @@ def test_list_users_under_roles_pagination_1(test_client, mocker):
     assert response.json().get('total') == num_of_user
 
 
-def test_list_users_under_roles_pagination_2(test_client, mocker):
+def test_list_users_under_roles_pagination_2(test_client, mocker, keycloak_admin_mock):
     num_of_user = 20
     page_size = 5
     users = create_test_user_list(num_of_user)
@@ -258,7 +257,7 @@ def test_list_users_under_roles_pagination_2(test_client, mocker):
     assert response.json().get('total') == num_of_user
 
 
-def test_list_users_under_roles_filter_by_name(test_client, mocker):
+def test_list_users_under_roles_filter_by_name(test_client, mocker, keycloak_admin_mock):
     num_of_user = 10
     users = create_test_user_list(num_of_user)
 
@@ -275,7 +274,7 @@ def test_list_users_under_roles_filter_by_name(test_client, mocker):
     assert len(response.json().get('result')) == 1
 
 
-def test_list_users_under_roles_filter_by_email(test_client, mocker):
+def test_list_users_under_roles_filter_by_email(test_client, mocker, keycloak_admin_mock):
     num_of_user = 10
     users = create_test_user_list(num_of_user)
 
@@ -292,7 +291,7 @@ def test_list_users_under_roles_filter_by_email(test_client, mocker):
     assert len(response.json().get('result')) == 1
 
 
-def test_list_users_under_roles_filter_order_by_email(test_client, mocker):
+def test_list_users_under_roles_filter_order_by_email(test_client, mocker, keycloak_admin_mock):
     num_of_user = 10
     users = create_test_user_list(num_of_user)
 
@@ -306,7 +305,7 @@ def test_list_users_under_roles_filter_order_by_email(test_client, mocker):
     assert user_list[0].get('email') > user_list[1].get('email')
 
 
-def test_list_users_under_roles_filter_order_by_username(test_client, mocker):
+def test_list_users_under_roles_filter_order_by_username(test_client, mocker, keycloak_admin_mock):
     num_of_user = 10
     users = create_test_user_list(num_of_user)
 

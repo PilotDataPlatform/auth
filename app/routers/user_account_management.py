@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from common.services.logger_services.logger_factory_service import SrvLoggerFactory
+from common import LoggerFactory
 from fastapi import APIRouter
 from fastapi_utils import cbv
 
@@ -33,7 +33,7 @@ router = APIRouter()
 
 _API_TAG = 'v1/user/account'
 _API_NAMESPACE = 'api_user_management'
-_logger = SrvLoggerFactory(_API_NAMESPACE).get_logger()
+_logger = LoggerFactory(_API_NAMESPACE).get_logger()
 
 
 @cbv.cbv(router)

@@ -28,7 +28,7 @@ test_user = {
 # user authentication method
 
 
-def test_authentication(test_client, mocker):
+def test_authentication(test_client, mocker, keycloak_admin_mock):
     mocker.patch(
         'app.resources.keycloak_api.ops_user.OperationsUser.get_token',
         return_value={'access_token': 'test', 'refresh_token': 'test'},
@@ -40,7 +40,7 @@ def test_authentication(test_client, mocker):
     assert response.status_code == 200
 
 
-def test_authentication_with_disable(test_client, mocker):
+def test_authentication_with_disable(test_client, mocker, keycloak_admin_mock):
     test_user_disable = {
         'username': 'test_user',
         'email': 'test_user',
@@ -62,7 +62,7 @@ def test_authentication_with_disable(test_client, mocker):
     assert response.json().get('error_msg') == 'User is disabled'
 
 
-def test_authentication_with_password_fail(test_client, mocker):
+def test_authentication_with_password_fail(test_client, mocker, keycloak_admin_mock):
 
     m = mocker.patch(
         'app.resources.keycloak_api.ops_user.OperationsUser.get_token',
@@ -74,7 +74,7 @@ def test_authentication_with_password_fail(test_client, mocker):
     assert response.status_code == 401
 
 
-def test_authentication_with_user_not_found(test_client, mocker):
+def test_authentication_with_user_not_found(test_client, mocker, keycloak_admin_mock):
 
     m = mocker.patch(
         'app.resources.keycloak_api.ops_user.OperationsUser.get_token',
@@ -87,7 +87,7 @@ def test_authentication_with_user_not_found(test_client, mocker):
 
 
 # refresh token tests
-def test_token_refresh(test_client, mocker):
+def test_token_refresh(test_client, mocker, keycloak_admin_mock):
 
     m = mocker.patch(
         'app.resources.keycloak_api.ops_user.OperationsUser.get_refresh_token',
@@ -103,7 +103,7 @@ def test_token_refresh(test_client, mocker):
     assert response.status_code == 200
 
 
-def test_token_refresh_missing_payload(test_client, mocker):
+def test_token_refresh_missing_payload(test_client, mocker, keycloak_admin_mock):
 
     m = mocker.patch(
         'app.resources.keycloak_api.ops_user.OperationsUser.get_refresh_token',
@@ -115,7 +115,7 @@ def test_token_refresh_missing_payload(test_client, mocker):
 
 
 # user realm operation
-def test_add_user_keycloak_realm_role(test_client, mocker):
+def test_add_user_keycloak_realm_role(test_client, mocker, keycloak_admin_mock):
 
     mocker.patch('app.resources.keycloak_api.ops_admin.OperationsAdmin.get_user_by_email', return_value={'id': 'test'})
     mocker.patch('app.resources.keycloak_api.ops_admin.OperationsAdmin.assign_user_role', return_value={})
@@ -124,12 +124,21 @@ def test_add_user_keycloak_realm_role(test_client, mocker):
     assert response.status_code == 200
 
 
-def test_remove_user_keycloak_realm_role(test_client, mocker):
+def test_remove_user_keycloak_realm_role(test_client, mocker, keycloak_admin_mock):
     mocker.patch(
         'app.resources.keycloak_api.ops_admin.OperationsAdmin.get_user_by_email',
         return_value={'id': uuid4(), 'username': 'fakeuser'}
     )
+    mocker.patch(
+        'app.resources.keycloak_api.ops_admin.OperationsAdmin.get_user_by_username',
+        return_value={'id': uuid4(), 'username': 'fakeuser'}
+    )
+    mocker.patch(
+        'app.resources.keycloak_api.ops_admin.OperationsAdmin.get_user_realm_roles',
+        return_value=[]
+    )
     mocker.patch('app.resources.keycloak_api.ops_admin.OperationsAdmin.delete_role_of_user', return_value={})
+    mocker.patch('app.resources.keycloak_api.ops_admin.OperationsAdmin.assign_user_role', return_value=None)
 
     response = test_client.delete(
         '/v1/user/project-role',
@@ -161,7 +170,7 @@ def create_test_user_list(size=10):
 
 
 # list platform user test
-def test_list_platform_user_pagination_1(test_client, mocker):
+def test_list_platform_user_pagination_1(test_client, mocker, keycloak_admin_mock):
     num_of_user = 20
     page_size = 10
     users = create_test_user_list(num_of_user)
@@ -175,7 +184,7 @@ def test_list_platform_user_pagination_1(test_client, mocker):
     assert len(response.json().get('result')) == page_size
 
 
-def test_list_platform_user_pagination_2(test_client, mocker):
+def test_list_platform_user_pagination_2(test_client, mocker, keycloak_admin_mock):
     num_of_user = 20
     page_size = 5
     users = create_test_user_list(num_of_user)
@@ -190,7 +199,7 @@ def test_list_platform_user_pagination_2(test_client, mocker):
     assert response.json().get('num_of_pages') == (num_of_user / page_size)
 
 
-def test_list_platform_user_platform_admin_check(test_client, mocker):
+def test_list_platform_user_platform_admin_check(test_client, mocker, keycloak_admin_mock):
     num_of_user = 20
     users = create_test_user_list(num_of_user)
 
@@ -208,7 +217,7 @@ def test_list_platform_user_platform_admin_check(test_client, mocker):
             assert x.get('role') == 'admin'
 
 
-def test_list_users_under_roles_filter_order_by_email(test_client, mocker):
+def test_list_users_under_roles_filter_order_by_email(test_client, mocker, keycloak_admin_mock):
     num_of_user = 20
     page_size = 10
     users = create_test_user_list(num_of_user)
@@ -223,7 +232,7 @@ def test_list_users_under_roles_filter_order_by_email(test_client, mocker):
     assert user_list[0].get('email') > user_list[1].get('email')
 
 
-def test_list_users_under_roles_filter_order_by_username(test_client, mocker):
+def test_list_users_under_roles_filter_order_by_username(test_client, mocker, keycloak_admin_mock):
     num_of_user = 20
     page_size = 10
     users = create_test_user_list(num_of_user)
@@ -238,7 +247,7 @@ def test_list_users_under_roles_filter_order_by_username(test_client, mocker):
     assert user_list[0].get('email') > user_list[1].get('email')
 
 
-def test_list_users_under_roles_filter_order_by_last_name(test_client, mocker):
+def test_list_users_under_roles_filter_order_by_last_name(test_client, mocker, keycloak_admin_mock):
     num_of_user = 20
     page_size = 10
     users = create_test_user_list(num_of_user)

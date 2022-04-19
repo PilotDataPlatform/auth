@@ -16,11 +16,11 @@
 from typing import Tuple
 
 import ldap
-from common.services.logger_services.logger_factory_service import SrvLoggerFactory
+from common import LoggerFactory
 
 from app.config import ConfigSettings
 
-_logger = SrvLoggerFactory('ldap client').get_logger()
+_logger = LoggerFactory('ldap client').get_logger()
 
 
 class LdapClient:

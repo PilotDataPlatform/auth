@@ -16,7 +16,7 @@
 from uuid import uuid4
 
 
-def test_user_add_ad_group(test_client, mocker):
+def test_user_add_ad_group(test_client, mocker, ldap_client_mock):
     mocker.patch('app.services.data_providers.ldap_client.LdapClient.get_user_by_email', return_value=(None, None))
     mocker.patch('app.services.data_providers.ldap_client.LdapClient.format_group_dn')
     mocker.patch('app.services.data_providers.ldap_client.LdapClient.add_user_to_group')
@@ -33,7 +33,7 @@ def test_user_add_ad_group(test_client, mocker):
     assert response.json().get('result') == '%s user %s from ad group' % ('add', 'test_email')
 
 
-def test_user_remove_ad_group(test_client, mocker):
+def test_user_remove_ad_group(test_client, mocker, ldap_client_mock):
     mocker.patch('app.services.data_providers.ldap_client.LdapClient.get_user_by_email', return_value=(None, None))
     mocker.patch('app.services.data_providers.ldap_client.LdapClient.format_group_dn')
     mocker.patch('app.services.data_providers.ldap_client.LdapClient.remove_user_from_group')
@@ -51,7 +51,7 @@ def test_user_remove_ad_group(test_client, mocker):
 
 
 # disable/enable user
-def test_user_enable(test_client, mocker):
+def test_user_enable(test_client, mocker, keycloak_admin_mock):
     mocker.patch(
         'app.resources.keycloak_api.ops_admin.OperationsAdmin.get_user_by_email',
         return_value={'id': uuid4(), 'username': 'fakeuser'}
@@ -70,7 +70,7 @@ def test_user_enable(test_client, mocker):
     assert response.json().get('result') == '%s user %s' % ('enable', 'test_email')
 
 
-def test_user_disable(test_client, mocker):
+def test_user_disable(test_client, mocker, keycloak_admin_mock, ldap_client_mock):
     mocker.patch(
         'app.resources.keycloak_api.ops_admin.OperationsAdmin.get_user_by_email',
         return_value={'id': uuid4(), 'username': 'fakeuser'}

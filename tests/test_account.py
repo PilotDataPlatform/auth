@@ -20,7 +20,7 @@ def test_user_account_duplicate(test_client, mocker):
     assert response.status_code == 400
 
 
-def test_user_account_user_dn_not_found(test_client, mocker):
+def test_user_account_user_dn_not_found(test_client, mocker, keycloak_admin_mock, ldap_client_mock):
     mocker.patch('app.routers.accounts.AccountRequest.is_duplicate_user', return_value=False)
     mocker.patch('app.services.data_providers.ldap_client.LdapClient.get_user_by_username', return_value=(None, None))
     mocker.patch('app.services.notifier_services.email_service.SrvEmail.send')
@@ -31,7 +31,7 @@ def test_user_account_user_dn_not_found(test_client, mocker):
     assert response.json().get('result') == 'Request for a test account is under review'
 
 
-def test_user_account_user_dn_exist(test_client, mocker):
+def test_user_account_user_dn_exist(test_client, mocker, keycloak_admin_mock, ldap_client_mock):
     mocker.patch('app.routers.accounts.AccountRequest.is_duplicate_user', return_value=False)
     mocker.patch(
         'app.services.data_providers.ldap_client.LdapClient.get_user_by_username',
@@ -56,7 +56,7 @@ def test_user_account_user_dn_exist(test_client, mocker):
     assert response.json().get('result') == 'Request for a test account has been approved'
 
 
-def test_user_account_email_not_match(test_client, mocker):
+def test_user_account_email_not_match(test_client, mocker, keycloak_admin_mock, ldap_client_mock):
     mocker.patch('app.routers.accounts.AccountRequest.is_duplicate_user', return_value=False)
     mocker.patch(
         'app.services.data_providers.ldap_client.LdapClient.get_user_by_username',
@@ -77,5 +77,6 @@ def test_user_account_email_not_match(test_client, mocker):
     mocker.patch('app.services.notifier_services.email_service.SrvEmail.send')
 
     response = test_client.post('/v1/accounts', json={'email': 'test_email', 'username': 'test_user'})
+    print(response.json())
     assert response.status_code == 200
     assert response.json().get('result') == 'Request for a test account is under review'

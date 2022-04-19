@@ -15,7 +15,7 @@
 
 import httpx
 import requests
-from common.services.logger_services.logger_factory_service import SrvLoggerFactory
+from common import LoggerFactory
 from fastapi import APIRouter
 from fastapi_utils import cbv
 
@@ -37,7 +37,7 @@ router = APIRouter()
 _API_TAG = '/v1/accounts'
 _API_NAMESPACE = 'accounts'
 
-logger = SrvLoggerFactory(_API_NAMESPACE).get_logger()
+logger = LoggerFactory(_API_NAMESPACE).get_logger()
 
 
 # THE api is used directly from frontend to create test account

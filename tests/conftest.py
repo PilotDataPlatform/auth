@@ -27,6 +27,68 @@ from app.models.sql_invitation import InvitationModel
 from app.models.sql_events import UserEventModel
 
 
+@pytest.fixture
+def keycloak_user_mock(monkeypatch):
+    from app.resources.keycloak_api.ops_user import OperationsUser
+    class OperationsUserMock:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def fake_init(self, *args, **kwargs):
+            pass
+    ops_mock_client = OperationsUserMock()
+    monkeypatch.setattr(OperationsUser, '__init__', ops_mock_client.fake_init)
+
+
+@pytest.fixture
+def keycloak_admin_mock(monkeypatch):
+    from app.resources.keycloak_api.ops_admin import OperationsAdmin
+    from app.resources.keycloak_api.ops_user import OperationsUser
+    class OperationsAdminMock:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def fake_init(self, *args, **kwargs):
+            pass
+    ops_mock_client = OperationsAdminMock()
+    monkeypatch.setattr(OperationsAdmin, '__init__', ops_mock_client.fake_init)
+
+    class OperationsUserMock:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def fake_init(self, *args, **kwargs):
+            pass
+    ops_mock_client = OperationsUserMock()
+    monkeypatch.setattr(OperationsUser, '__init__', ops_mock_client.fake_init)
+
+
+@pytest.fixture
+def ldap_client_mock(monkeypatch):
+    from app.services.data_providers.ldap_client import LdapClient
+
+    class LdapClientMock:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def fake_init(self, *args, **kwargs):
+            pass
+
+        def connect(self, *args, **kwargs):
+            pass
+
+        def disconnect(self, *args, **kwargs):
+            pass
+
+        def format_group_dn(self, group_name):
+            return group_name
+    ldap_client = LdapClientMock()
+    monkeypatch.setattr(LdapClient, '__init__', ldap_client.fake_init)
+    monkeypatch.setattr(LdapClient, 'format_group_dn', ldap_client.format_group_dn)
+    monkeypatch.setattr(LdapClient, 'connect', ldap_client.connect)
+    monkeypatch.setattr(LdapClient, 'disconnect', ldap_client.disconnect)
+
+
 @pytest.fixture(scope='session', autouse=True)
 def db():
     with PostgresContainer('postgres:14.1') as postgres:

@@ -34,7 +34,7 @@ user_json = {
 }
 
 @mock.patch.object(OperationsAdmin, 'get_user_by_username', side_effect=None)
-def test_create_event(get_user_mock, test_client):
+def test_create_event(get_user_mock, test_client, keycloak_admin_mock):
     get_user_mock.return_value = user_json
     payload = {
         'target_user': 'testuser',
@@ -47,7 +47,7 @@ def test_create_event(get_user_mock, test_client):
 
 
 @mock.patch.object(OperationsAdmin, 'get_user_by_username', side_effect=None)
-def test_create_event_role(get_user_mock, test_client):
+def test_create_event_role(get_user_mock, test_client, keycloak_admin_mock):
     get_user_mock.return_value = user_json
     payload = {
         'target_user': 'testuser',
@@ -64,7 +64,7 @@ def test_create_event_role(get_user_mock, test_client):
 
 
 @mock.patch.object(OperationsAdmin, 'get_user_by_username', side_effect=None)
-def test_create_event_invite(get_user_mock, test_client):
+def test_create_event_invite(get_user_mock, test_client, keycloak_admin_mock):
     get_user_mock.return_value = user_json
     payload = {
         'operator': 'admin',
@@ -79,7 +79,7 @@ def test_create_event_invite(get_user_mock, test_client):
 
 
 @mock.patch.object(OperationsAdmin, 'get_user_by_username', side_effect=None)
-def test_create_event_role_no_operator(get_user_mock, test_client):
+def test_create_event_role_no_operator(get_user_mock, test_client, keycloak_admin_mock):
     get_user_mock.return_value = user_json
     payload = {
         'target_user': 'testuser',

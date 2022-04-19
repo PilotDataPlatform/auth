@@ -15,7 +15,7 @@
 
 import casbin
 import casbin_sqlalchemy_adapter
-from common.services.logger_services.logger_factory_service import SrvLoggerFactory
+from common import LoggerFactory
 from fastapi import APIRouter
 from fastapi_utils import cbv
 from sqlalchemy import create_engine
@@ -31,7 +31,7 @@ router = APIRouter()
 
 _API_TAG = '/v1/authorize'
 _API_NAMESPACE = 'api_authorize'
-_logger = SrvLoggerFactory(_API_NAMESPACE).get_logger()
+_logger = LoggerFactory(_API_NAMESPACE).get_logger()
 
 
 def _get_sqlalchemy_engine():
