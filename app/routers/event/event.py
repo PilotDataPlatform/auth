@@ -16,7 +16,7 @@
 from fastapi import APIRouter, Depends
 from fastapi_sqlalchemy import db
 from fastapi_utils.cbv import cbv
-from logger import LoggerFactory
+from common import LoggerFactory
 import math
 
 from app.commons.psql_services.user_event import create_event, query_events

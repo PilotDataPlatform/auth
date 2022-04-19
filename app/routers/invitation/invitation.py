@@ -18,7 +18,7 @@ import math
 from fastapi import APIRouter
 from fastapi_sqlalchemy import db
 from fastapi_utils.cbv import cbv
-from logger import LoggerFactory
+from common import LoggerFactory
 
 from app.commons.project_services import get_project_by_geid
 from app.commons.psql_services.invitation import create_invite, query_invites

@@ -15,7 +15,7 @@
 
 import base64
 
-from logger import LoggerFactory
+from common import LoggerFactory
 
 from app.config import ConfigSettings
 from app.models.sql_invitation import InvitationModel

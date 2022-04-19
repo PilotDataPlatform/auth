@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from fastapi_sqlalchemy import db
-from logger import LoggerFactory
+from common import LoggerFactory
 
 from app.models.api_response import EAPIResponseCode
 from app.models.sql_invitation import InvitationModel

@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from fastapi_sqlalchemy import db
-from logger import LoggerFactory
+from common import LoggerFactory
 from typing import Tuple
 
 from app.models.api_response import EAPIResponseCode
@@ -22,7 +22,7 @@ from app.models.sql_events import UserEventModel
 from app.resources.error_handler import APIException
 from app.resources.keycloak_api.ops_admin import OperationsAdmin
 from app.config import ConfigSettings
-from sqlalchemy import cast, String
+from sqlalchemy import cast, String, or_
 
 
 _logger = LoggerFactory('api_user_event').get_logger()
@@ -34,7 +34,12 @@ def query_events(query: dict, page: int, page_size: int, order_type: str, order_
         event_query = db.session.query(UserEventModel)
         for key, value in query.items():
             if key == "project_code":
-                event_query = event_query.filter(UserEventModel.detail['project_code'].as_string() == value)
+                event_query = event_query.filter(
+                    or_(
+                        UserEventModel.detail['project_code'].as_string() == value,
+                        UserEventModel.event_type.in_(["ACCOUNT_DISABLE", "ACCOUNT_ACTIVATED"])
+                    )
+                )
             elif key == "invitation_id":
                 event_query = event_query.filter(UserEventModel.detail['invitation_id'].as_string() == value)
             else:

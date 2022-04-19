@@ -38,7 +38,7 @@ class EventPOST(BaseModel):
             'REMOVE_FROM_PROJECT',
             'ROLE_CHANGE',
             'ACCOUNT_DISABLE',
-            'ACCOUNT_ACTIVATE',
+            'ACCOUNT_ACTIVATED',
         ]
         if v not in valid_event_types:
             raise APIException(status_code=EAPIResponseCode.bad_request.value, error_msg='Invalid event_type')

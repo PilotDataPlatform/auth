@@ -39,7 +39,7 @@ def test_create_event(get_user_mock, test_client, keycloak_admin_mock):
     payload = {
         'target_user': 'testuser',
         'operator': 'admin',
-        'event_type': 'ACCOUNT_ACTIVATE',
+        'event_type': 'ACCOUNT_ACTIVATED',
         'detail': {},
     }
     response = test_client.post('/v1/events', json=payload)
@@ -84,7 +84,7 @@ def test_create_event_role_no_operator(get_user_mock, test_client, keycloak_admi
     payload = {
         'target_user': 'testuser',
         'operator': '',
-        'event_type': 'ACCOUNT_ACTIVATE',
+        'event_type': 'ACCOUNT_ACTIVATED',
         'detail': {},
     }
     response = test_client.post('/v1/events', json=payload)
@@ -97,10 +97,11 @@ def test_list_events_query_200(test_client):
         "project_code": "fakecode",
     }
     response = test_client.get('/v1/events', params=payload)
-    print(response.json())
     assert response.status_code == 200
-    assert response.json()["result"][0]["detail"]["to"] == "admin"
-    assert response.json()["result"][0]["detail"]["from"] == "contributor"
+    for event in response.json()["result"]:
+        if not event["event_type"] in ["ACCOUNT_ACTIVATED", "ACCOUNT_DISABLE"]:
+            assert event["detail"]["project_code"] == "fakecode"
+
 
 
 @pytest.mark.dependency(depends=["test_create_event", "test_create_event_role"])
