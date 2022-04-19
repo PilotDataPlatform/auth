@@ -1,0 +1,45 @@
+CONFIG_CENTER_ENABLED=False
+
+NEO4J_SERVICE="neo4j_host"
+EMAIL_SERVICE="email_host"
+
+EMAIL_SUPPORT="fake@test.com"
+EMAIL_ADMIN="fake@test.com"
+EMAIL_HELPDESK="fake@test.com"
+
+# LDAP configs
+LDAP_URL="ldap_host"
+LDAP_ADMIN_DN=""
+LDAP_ADMIN_SECRET=""
+LDAP_OU=""
+LDAP_DC1=""
+LDAP_DC2=""
+LDAP_objectclass=""
+LDAP_USER_GROUP="testgroup"
+LDAP_COMMON_NAME_PREFIX="testprefix"
+
+# BFF RDS
+RDS_HOST="fakehost"
+RDS_PORT=5432
+RDS_DBNAME="test"
+RDS_USER="test"
+RDS_PWD="test"
+RDS_SCHEMA_DEFAULT="test"
+RDS_DB_URI="test"
+RDS_SCHEMA_PREFIX="test"
+
+# Keycloak config
+KEYCLOAK_GRANT_TYPE=""
+KEYCLOAK_ID=""
+KEYCLOAK_SERVER_URL=""
+KEYCLOAK_CLIENT_ID=""
+KEYCLOAK_SECRET=""
+KEYCLOAK_REALM=""
+
+DOMAIN_NAME=""
+START_PATH=""
+GUIDE_PATH=""
+
+AD_USER_GROUP=""
+AD_ADMIN_GROUP=""
+PROJECT_NAME=""

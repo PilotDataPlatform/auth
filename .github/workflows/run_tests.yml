@@ -31,5 +31,7 @@ jobs:
             poetry-${{ hashFiles('**/poetry.lock') }}
       - name: Install dependencies
         run: poetry install
+      - name: Copy test .env
+        run: cp tests/env_test .env
       - name: Run tests
         run: poetry run python -m pytest tests/
