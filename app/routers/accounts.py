@@ -14,11 +14,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import httpx
-import requests
 from common import LoggerFactory
 from fastapi import APIRouter
 from fastapi_utils import cbv
 
+from app.commons.psql_services.invitation import create_invite
 from app.config import ConfigSettings
 from app.models.accounts import AccountRequestPOST, ContractRequestPOST
 from app.models.api_response import APIResponse, EAPIResponseCode
@@ -125,7 +125,7 @@ class AccountRequest:
 
         email_service = SrvEmail()
         if self.is_duplicate_user(username, email):
-            res.error_msg = f'duplicate user'
+            res.error_msg = 'duplicate user'
             res.code = EAPIResponseCode.bad_request
             return res.json_response()
 
@@ -171,7 +171,10 @@ class AccountRequest:
         first_name = user_data.get('givenName', '')[0].decode()
         if not first_name:
             first_name = username
-        last_name = user_data.get('sn', '')[0].decode()
+        if user_data.get('sn'):
+            last_name = user_data.get['sn'][0].decode()
+        else:
+            last_name = ""
 
         if ldap_email.lower() == email.lower():
             # User found in AD, create user and send email to user and support
@@ -187,6 +190,25 @@ class AccountRequest:
                 logger.error(error_msg)
                 ldap_client.disconnect()
                 raise APIException(status_code=EAPIResponseCode.internal_error.value, error_msg=error_msg)
+
+            result = httpx.post(
+                ConfigSettings.NEO4J_SERVICE + "nodes/Container/query",
+                json={"code": ConfigSettings.TEST_PROJECT_CODE}
+            )
+            if not result.json():
+                error_msg = f'Project not found: {ConfigSettings.TEST_PROJECT_CODE}'
+                logger.error(error_msg)
+                raise APIException(status_code=EAPIResponseCode.internal_error.value, error_msg=error_msg)
+            project_node = result.json()[0]
+            invite_data = {
+                "email": email,
+                "invited_by": "test_account",
+                "platform_role": "member",
+                "project_role": ConfigSettings.TEST_PROJECT_ROLE,
+                "project_id": project_node["global_entity_id"],
+                "status": "pending",
+            }
+            create_invite(invite_data)
 
             email_service.send(
                 subject='Auto-Notification: Request for a Test Account Approved',
