@@ -172,7 +172,7 @@ class AccountRequest:
         if not first_name:
             first_name = username
         if user_data.get('sn'):
-            last_name = user_data.get['sn'][0].decode()
+            last_name = user_data['sn'][0].decode()
         else:
             last_name = ""
 
