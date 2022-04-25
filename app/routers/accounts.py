@@ -19,6 +19,7 @@ from fastapi import APIRouter
 from fastapi_utils import cbv
 
 from app.commons.psql_services.invitation import create_invite
+from app.commons.psql_services.user_event import create_event
 from app.config import ConfigSettings
 from app.models.accounts import AccountRequestPOST, ContractRequestPOST
 from app.models.api_response import APIResponse, EAPIResponseCode
@@ -208,7 +209,19 @@ class AccountRequest:
                 "project_id": project_node["global_entity_id"],
                 "status": "pending",
             }
-            create_invite(invite_data)
+            invite = create_invite(invite_data)
+
+            event_detail = {
+                "operator": username,
+                "event_type": "INVITE_TO_PROJECT",
+                "detail": {
+                    "invitation_id": str(invite.id),
+                    "platform_role": "member",
+                    "project_role": ConfigSettings.TEST_PROJECT_ROLE,
+                    "project_code": ConfigSettings.TEST_PROJECT_CODE,
+                }
+            }
+            create_event(event_detail)
 
             email_service.send(
                 subject='Auto-Notification: Request for a Test Account Approved',
