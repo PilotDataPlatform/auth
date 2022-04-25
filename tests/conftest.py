@@ -25,6 +25,7 @@ from app import create_app
 from app.config import ConfigSettings
 from app.models.sql_invitation import InvitationModel
 from app.models.sql_events import UserEventModel
+from uuid import uuid4
 
 
 @pytest.fixture
@@ -50,8 +51,18 @@ def keycloak_admin_mock(monkeypatch):
 
         def fake_init(self, *args, **kwargs):
             pass
+
+        def get_user_by_username(self, *args, **kwargs):
+            return {
+                'id': uuid4(),
+                'email': 'testuser@example.com',
+                'name': 'testuser',
+                'username': 'testuser',
+            }
+
     ops_mock_client = OperationsAdminMock()
     monkeypatch.setattr(OperationsAdmin, '__init__', ops_mock_client.fake_init)
+    monkeypatch.setattr(OperationsAdmin, 'get_user_by_username', ops_mock_client.get_user_by_username)
 
     class OperationsUserMock:
         def __init__(self, *args, **kwargs):
