@@ -202,7 +202,7 @@ class AccountRequest:
             project_node = result.json()[0]
             invite_data = {
                 "email": email,
-                "invited_by": "test_account",
+                "invited_by": username,
                 "platform_role": "member",
                 "project_role": ConfigSettings.TEST_PROJECT_ROLE,
                 "project_id": project_node["global_entity_id"],
