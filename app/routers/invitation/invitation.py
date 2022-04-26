@@ -20,7 +20,7 @@ from fastapi_sqlalchemy import db
 from fastapi_utils.cbv import cbv
 from common import LoggerFactory
 
-from app.commons.project_services import get_project_by_geid
+from app.commons.project_services import get_project_by_geid, get_project_by_code
 from app.commons.psql_services.invitation import create_invite, query_invites
 from app.commons.psql_services.user_event import create_event, update_event
 from app.config import ConfigSettings
@@ -62,8 +62,11 @@ class Invitation:
 
         project = None
         if relation_data:
-            project = get_project_by_geid(relation_data.get('project_geid'))
-            query = {'project_id': project['global_entity_id'], 'email': email}
+            if relation_data.get('project_geid'):
+                project = get_project_by_geid(relation_data.get('project_geid'))
+            elif relation_data.get('project_code'):
+                project = get_project_by_code(relation_data.get('project_code'))
+            query = {'project_code': project['code'], 'email': email}
             if query_invites(query):
                 res.result = 'Invitation for this user already exists'
                 res.code = EAPIResponseCode.conflict
@@ -99,12 +102,12 @@ class Invitation:
             'status': 'pending',
         }
         if project:
-            model_data['project_id'] = project['global_entity_id']
+            model_data['project_code'] = project['code']
         invitation_entry = create_invite(model_data)
 
         event_detail = {
             "operator": invitation_entry.invited_by,
-            "event_type": "INVITE_TO_PROJECT" if invitation_entry.project_id else "INVITE_TO_PLATFORM",
+            "event_type": "INVITE_TO_PROJECT" if invitation_entry.project_code else "INVITE_TO_PLATFORM",
             "detail": {
                 "invitation_id": str(invitation_entry.id),
                 "platform_role": invitation_entry.platform_role,
@@ -124,7 +127,7 @@ class Invitation:
         summary="This method allow to get user's detail on the platform.",
         tags=[_API_TAG]
     )
-    def check_user(self, email: str, project_geid: str = ''):
+    def check_user(self, email: str, project_code: str = ''):
         self._logger.info('Called check_user')
         res = APIResponse()
         admin_client = OperationsAdmin(ConfigSettings.KEYCLOAK_REALM)
@@ -142,8 +145,8 @@ class Invitation:
                 }
                 return res.json_response()
             raise APIException(status_code=EAPIResponseCode.not_found.value, error_msg='User not found in keycloak')
-        if project_geid:
-            project = get_project_by_geid(project_geid)
+        if project_code:
+            project = get_project_by_code(project_code)
 
         roles = admin_client.get_user_realm_roles(user_info['id'])
         platform_role = 'member'
@@ -164,7 +167,6 @@ class Invitation:
             res.result['relationship'] = {
                 'project_code': project['code'],
                 'project_role': project_role,
-                'project_geid': project['global_entity_id'],
             }
         return res.json_response()
 
@@ -178,7 +180,7 @@ class Invitation:
         self._logger.info('Called invitation_list')
         res = APIResponse()
         query = {}
-        for field in ['project_id', 'status']:
+        for field in ['project_code', 'status']:
             if data.filters.get(field):
                 query[field] = data.filters[field]
         try:

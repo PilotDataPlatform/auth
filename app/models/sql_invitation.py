@@ -36,7 +36,7 @@ class InvitationModel(Base):
     email = Column(String())
     platform_role = Column(String())
     project_role = Column(String())
-    project_id = Column(String())
+    project_code = Column(String())
     status = Column(String())
 
     def __init__(self, **kwargs):
@@ -54,7 +54,7 @@ class InvitationModel(Base):
             'email',
             'platform_role',
             'project_role',
-            'project_id',
+            'project_code',
             'status',
         ]
         for field in field_list:

@@ -159,7 +159,7 @@ def test_create_invitation_exists_in_ad(test_client, httpx_mock, ldap_mock, ops_
         'email': 'test1@example.com',
         'platform_role': 'member',
         'relationship': {
-            'project_geid': 'fakeprojectgeid',
+            'project_code': 'fakeproject',
             'project_role': 'admin',
             'inviter': 'admin',
         },
@@ -190,7 +190,7 @@ def test_create_invitation_no_ad(test_client, httpx_mock, ldap_mock, ops_admin_m
         'email': 'test2@example.com',
         'platform_role': 'member',
         'relationship': {
-            'project_geid': 'fakeprojectgeid',
+            'project_code': 'fakeproject',
             'project_role': 'admin',
             'inviter': 'admin',
         },
@@ -244,7 +244,7 @@ def test_create_invitation_already_exists_in_project(test_client, httpx_mock, ld
         'email': 'test2@example.com',
         'platform_role': 'member',
         'relationship': {
-            'project_geid': 'fakeprojectgeid',
+            'project_code': 'fakeproject',
             'project_role': 'admin',
             'inviter': 'admin',
         },
@@ -261,12 +261,12 @@ def test_get_invite_list(test_client, httpx_mock):
         'page': 0,
         'page_size': 1,
         'filters': {
-            'project_id': 'fakeprojectgeid',
+            'project_code': 'fakeproject',
         },
     }
     response = test_client.post('/v1/invitation-list', json=payload)
     assert response.status_code == 200
-    assert response.json()['result'][0]['project_id'] == 'fakeprojectgeid'
+    assert response.json()['result'][0]['project_code'] == 'fakeproject'
 
 
 @pytest.mark.dependency(depends=['test_create_invitation_exists_in_ad'])
@@ -280,7 +280,7 @@ def test_get_invite_list_filter(test_client, httpx_mock):
     }
     response = test_client.post('/v1/invitation-list', json=payload)
     assert response.status_code == 200
-    assert response.json()['result'][0]['project_id'] == 'fakeprojectgeid'
+    assert response.json()['result'][0]['project_code'] == 'fakeproject'
 
 
 @pytest.mark.dependency(depends=['test_create_invitation_exists_in_ad'])
@@ -330,12 +330,13 @@ def test_check_invite_email(test_client, httpx_mock, ops_admin_mock):
         status_code=200,
     )
     payload = {
-        'project_geid': 'fakeprojectgeid',
+        'project_code': 'fakeproject',
     }
     response = test_client.get('/v1/invitation/check/testuser@example.com', params=payload)
     assert response.status_code == 200
+    print(response.json())
     assert response.json()['result']['role'] == user_json['role']
-    assert response.json()['result']['relationship']['project_geid'] == 'fakeprojectgeid'
+    assert response.json()['result']['relationship']['project_code'] == 'fakeproject'
 
 
 def test_check_invite_email_bad_project_id(test_client, httpx_mock, ops_admin_mock):
@@ -343,11 +344,11 @@ def test_check_invite_email_bad_project_id(test_client, httpx_mock, ops_admin_mo
         method='POST', url=ConfigSettings.NEO4J_SERVICE + 'nodes/Container/query', json=[], status_code=200
     )
     payload = {
-        'project_geid': 'fakeprojectgeid',
+        'project_code': 'badcode',
     }
     response = test_client.get('/v1/invitation/check/testuser@example.com', params=payload)
     assert response.status_code == 404
-    assert response.json()['error_msg'] == 'Project not found: fakeprojectgeid'
+    assert response.json()['error_msg'] == 'Project not found: badcode'
 
 
 def test_check_invite_email_no_relation(test_client, httpx_mock, ops_admin_mock_no_relation):
@@ -364,7 +365,7 @@ def test_check_invite_email_no_relation(test_client, httpx_mock, ops_admin_mock_
         status_code=200,
     )
     payload = {
-        'project_geid': 'fakeprojectgeid',
+        'project_code': 'fakeproject',
     }
     response = test_client.get('/v1/invitation/check/testuser@example.com', params=payload)
     assert response.status_code == 200
@@ -377,7 +378,7 @@ def test_check_invite_email_platform_admin(test_client, httpx_mock, ops_admin_mo
         method='POST', url=ConfigSettings.NEO4J_SERVICE + 'nodes/Container/query', json=[{}], status_code=200
     )
     payload = {
-        'project_geid': 'fakeprojectgeid',
+        'project_code': 'fakeproject',
     }
     response = test_client.get('/v1/invitation/check/testuser@example.com', params=payload)
     assert response.status_code == 200
@@ -386,7 +387,7 @@ def test_check_invite_email_platform_admin(test_client, httpx_mock, ops_admin_mo
 
 def test_check_invite_no_user(test_client, httpx_mock, ops_admin_mock_no_user):
     payload = {
-        'project_geid': 'fakeprojectgeid',
+        'project_code': 'fakeproject',
     }
     response = test_client.get('/v1/invitation/check/testuser@example.com', params=payload)
     assert response.status_code == 404

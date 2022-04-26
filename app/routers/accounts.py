@@ -192,21 +192,12 @@ class AccountRequest:
                 ldap_client.disconnect()
                 raise APIException(status_code=EAPIResponseCode.internal_error.value, error_msg=error_msg)
 
-            result = httpx.post(
-                ConfigSettings.NEO4J_SERVICE + "nodes/Container/query",
-                json={"code": ConfigSettings.TEST_PROJECT_CODE}
-            )
-            if not result.json():
-                error_msg = f'Project not found: {ConfigSettings.TEST_PROJECT_CODE}'
-                logger.error(error_msg)
-                raise APIException(status_code=EAPIResponseCode.internal_error.value, error_msg=error_msg)
-            project_node = result.json()[0]
             invite_data = {
                 "email": email,
                 "invited_by": username,
                 "platform_role": "member",
                 "project_role": ConfigSettings.TEST_PROJECT_ROLE,
-                "project_id": project_node["global_entity_id"],
+                "project_code": ConfigSettings.TEST_PROJECT_CODE,
                 "status": "pending",
             }
             invite = create_invite(invite_data)
