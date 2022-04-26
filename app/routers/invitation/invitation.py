@@ -222,8 +222,6 @@ class Invitation:
             invite = db.session.query(InvitationModel).filter_by(**query).first()
             admin_client = OperationsAdmin(ConfigSettings.KEYCLOAK_REALM)
             user = admin_client.get_user_by_email(invite.email)
-            print(user)
-            print("====")
             update_event({"invitation_id": invite_id}, {"target_user": user["username"], "target_user_id": user["id"]})
         try:
             db.session.query(InvitationModel).filter_by(**query).update(update_data)
