@@ -68,9 +68,9 @@ def send_emails(invitation_entry: InvitationModel, project: dict, account_in_ad:
     attachment = []
     if not account_in_ad:
         if ConfigSettings.INVITE_ATTACHMENT:
-            with open(ConfigSetting.INVITE_ATTACHMENT, 'rb') as f:
+            with open(ConfigSettings.INVITE_ATTACHMENT, 'rb') as f:
                 data = base64.b64encode(f.read()).decode()
-                attachment = [{'name': ConfigSetting.INVITE_ATTACHMENT_NAME, 'data': data}]
+                attachment = [{'name': ConfigSettings.INVITE_ATTACHMENT_NAME, 'data': data}]
 
     email_sender.send(
         subject,

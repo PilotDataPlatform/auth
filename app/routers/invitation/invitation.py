@@ -15,22 +15,19 @@
 
 import math
 
+from common import LoggerFactory
 from fastapi import APIRouter
 from fastapi_sqlalchemy import db
 from fastapi_utils.cbv import cbv
-from common import LoggerFactory
 
-from app.commons.project_services import get_project_by_geid, get_project_by_code
+from app.commons.project_services import (get_project_by_code,
+                                          get_project_by_geid)
 from app.commons.psql_services.invitation import create_invite, query_invites
 from app.commons.psql_services.user_event import create_event, update_event
 from app.config import ConfigSettings
 from app.models.api_response import APIResponse, EAPIResponseCode
-from app.models.invitation import (
-    InvitationListPOST,
-    InvitationPOST,
-    InvitationPOSTResponse,
-    InvitationPUT,
-)
+from app.models.invitation import (InvitationListPOST, InvitationPOST,
+                                   InvitationPOSTResponse, InvitationPUT)
 from app.models.sql_invitation import InvitationModel
 from app.resources.error_handler import APIException
 from app.resources.keycloak_api.ops_admin import OperationsAdmin

@@ -14,10 +14,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
-
-import mock
-import pytest
 from uuid import uuid4
+
+import pytest
 
 from app.config import ConfigSettings
 
@@ -32,6 +31,7 @@ user_json = {
     'username': 'testuser',
     'attributes': {'status': ['active']},
 }
+
 
 def ops_admin_mock_client(monkeypatch, user_exists, relation=True, role="fakeproject-admin"):
     from app.resources.keycloak_api.ops_admin import OperationsAdmin
@@ -62,7 +62,6 @@ def ops_admin_mock_client(monkeypatch, user_exists, relation=True, role="fakepro
             else:
                 return []
 
-
     ops_mock_client = OperationsAdminMock(user_exists=user_exists)
     ops_mock_client.user_exists = user_exists
     ops_mock_client.relation = relation
@@ -71,6 +70,7 @@ def ops_admin_mock_client(monkeypatch, user_exists, relation=True, role="fakepro
     monkeypatch.setattr(OperationsAdmin, 'get_user_by_email', ops_mock_client.get_user_by_email)
     monkeypatch.setattr(OperationsAdmin, 'get_user_by_username', ops_mock_client.get_user_by_username)
     monkeypatch.setattr(OperationsAdmin, 'get_user_realm_roles', ops_mock_client.get_user_realm_roles)
+
 
 @pytest.fixture
 def ops_admin_mock(monkeypatch):
@@ -81,9 +81,11 @@ def ops_admin_mock(monkeypatch):
 def ops_admin_mock_no_user(monkeypatch):
     return ops_admin_mock_client(monkeypatch, False)
 
+
 @pytest.fixture
 def ops_admin_mock_no_relation(monkeypatch):
     return ops_admin_mock_client(monkeypatch, True, relation=False)
+
 
 @pytest.fixture
 def ops_admin_mock_admin(monkeypatch):
@@ -385,6 +387,7 @@ def test_check_invite_email_platform_admin(test_client, httpx_mock, ops_admin_mo
     assert response.json()['result']['role'] == 'admin'
     assert response.json()['result']['relationship'] == {}
 
+
 def test_check_invite_no_user(test_client, httpx_mock, ops_admin_mock_no_user):
     payload = {
         'project_code': 'fakeproject',
@@ -399,7 +402,7 @@ def test_invite_create_for_update(test_client, httpx_mock, ldap_mock, ops_admin_
     httpx_mock.add_response(
         method='POST', url=ConfigSettings.EMAIL_SERVICE, json={'result': 'success'}, status_code=200
     )
-    payload = {'email': f'event@test.com', 'platform_role': 'admin', 'invited_by': 'admin'}
+    payload = {'email': 'event@test.com', 'platform_role': 'admin', 'invited_by': 'admin'}
     response = test_client.post('/v1/invitations', json=payload)
     assert response.status_code == 200
 
@@ -412,7 +415,7 @@ def test_invite_update(test_client, httpx_mock, ops_admin_mock):
         'order_by': 'email',
         'order_type': 'desc',
         'filters': {
-            'email': f'event@test.com',
+            'email': 'event@test.com',
         },
     }
     response = test_client.post('/v1/invitation-list', json=payload)
@@ -428,7 +431,7 @@ def test_invite_update(test_client, httpx_mock, ops_admin_mock):
     payload = {
         'invitation_id': invite_id,
     }
-    response = test_client.get(f'/v1/events', params=payload)
+    response = test_client.get('/v1/events', params=payload)
     assert response.status_code == 200
     assert response.json()["result"][0]["target_user"] == user_json["username"]
     assert response.json()["result"][0]["target_user_id"] == str(user_json["id"])
