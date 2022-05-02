@@ -20,13 +20,6 @@ from app.models.api_response import EAPIResponseCode
 from app.resources.error_handler import APIException
 
 
-def get_project_by_geid(geid: str) -> dict:
-    payload = {'global_entity_id': geid}
-    response = httpx.post(ConfigSettings.NEO4J_SERVICE + 'nodes/Container/query', json=payload)
-    if not response.json():
-        raise APIException(status_code=EAPIResponseCode.not_found.value, error_msg=f'Project not found: {geid}')
-    return response.json()[0]
-
 def get_project_by_code(code: str) -> dict:
     payload = {'code': code}
     response = httpx.post(ConfigSettings.NEO4J_SERVICE + 'nodes/Container/query', json=payload)

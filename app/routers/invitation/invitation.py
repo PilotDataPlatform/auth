@@ -20,8 +20,7 @@ from fastapi import APIRouter
 from fastapi_sqlalchemy import db
 from fastapi_utils.cbv import cbv
 
-from app.commons.project_services import (get_project_by_code,
-                                          get_project_by_geid)
+from app.commons.project_services import get_project_by_code
 from app.commons.psql_services.invitation import create_invite, query_invites
 from app.commons.psql_services.user_event import create_event, update_event
 from app.config import ConfigSettings
@@ -59,9 +58,7 @@ class Invitation:
 
         project = None
         if relation_data:
-            if relation_data.get('project_geid'):
-                project = get_project_by_geid(relation_data.get('project_geid'))
-            elif relation_data.get('project_code'):
+            if relation_data.get('project_code'):
                 project = get_project_by_code(relation_data.get('project_code'))
             query = {'project_code': project['code'], 'email': email}
             if query_invites(query):
