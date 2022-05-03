@@ -47,7 +47,7 @@ class InvitationPOST(BaseModel):
     def validate_relationship(cls, v):
         if not v:
             return v
-        for key in ['project_geid', 'project_role', 'inviter']:
+        for key in ['project_role', 'inviter']:
             if key not in v.keys():
                 raise APIException(
                     status_code=EAPIResponseCode.bad_request.value,

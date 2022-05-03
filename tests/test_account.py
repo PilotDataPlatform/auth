@@ -46,19 +46,6 @@ def test_user_account_user_dn_exist(test_client, mocker, keycloak_admin_mock, ld
         ),
     )
 
-    httpx_mock.add_response(
-        method='POST',
-        url=ConfigSettings.NEO4J_SERVICE + 'nodes/Container/query',
-        json=[
-            {
-                'global_entity_id': 'fakeprojectgeid',
-                'name': 'Fake Project',
-                'code': 'fakeproject',
-            }
-        ],
-        status_code=200,
-    )
-
     mocker.patch('app.services.data_providers.ldap_client.LdapClient.add_user_to_group')
     mocker.patch('app.services.data_providers.ldap_client.LdapClient.add_user_to_group')
 

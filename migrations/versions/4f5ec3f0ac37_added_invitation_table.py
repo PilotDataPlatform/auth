@@ -27,7 +27,7 @@ def upgrade():
         sa.Column('email', sa.String(), nullable=True),
         sa.Column('platform_role', sa.String(), nullable=True),
         sa.Column('project_role', sa.String(), nullable=True),
-        sa.Column('project_id', sa.String(), nullable=True),
+        sa.Column('project_code', sa.String(), nullable=True),
         sa.Column('status', sa.String(), nullable=True),
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('id'),

@@ -12,23 +12,15 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-from enum import Enum
-from typing import Any, Dict, List, Optional
-from uuid import UUID
-
-from pydantic import BaseModel, Field
-from pydantic.types import constr
+from pydantic import BaseModel
 
 
 class AccountRequestPOST(BaseModel):
-
     email: str
     username: str
 
 
 class ContractRequestPOST(BaseModel):
-
     contract_description: str
     interest_description: str
     email: str

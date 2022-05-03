@@ -14,10 +14,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
-
-import mock
-import pytest
 from uuid import uuid4
+
+import pytest
 
 from app.config import ConfigSettings
 
@@ -32,6 +31,7 @@ user_json = {
     'username': 'testuser',
     'attributes': {'status': ['active']},
 }
+
 
 def ops_admin_mock_client(monkeypatch, user_exists, relation=True, role="fakeproject-admin"):
     from app.resources.keycloak_api.ops_admin import OperationsAdmin
@@ -62,7 +62,6 @@ def ops_admin_mock_client(monkeypatch, user_exists, relation=True, role="fakepro
             else:
                 return []
 
-
     ops_mock_client = OperationsAdminMock(user_exists=user_exists)
     ops_mock_client.user_exists = user_exists
     ops_mock_client.relation = relation
@@ -71,6 +70,7 @@ def ops_admin_mock_client(monkeypatch, user_exists, relation=True, role="fakepro
     monkeypatch.setattr(OperationsAdmin, 'get_user_by_email', ops_mock_client.get_user_by_email)
     monkeypatch.setattr(OperationsAdmin, 'get_user_by_username', ops_mock_client.get_user_by_username)
     monkeypatch.setattr(OperationsAdmin, 'get_user_realm_roles', ops_mock_client.get_user_realm_roles)
+
 
 @pytest.fixture
 def ops_admin_mock(monkeypatch):
@@ -81,21 +81,24 @@ def ops_admin_mock(monkeypatch):
 def ops_admin_mock_no_user(monkeypatch):
     return ops_admin_mock_client(monkeypatch, False)
 
+
 @pytest.fixture
 def ops_admin_mock_no_relation(monkeypatch):
     return ops_admin_mock_client(monkeypatch, True, relation=False)
+
 
 @pytest.fixture
 def ops_admin_mock_admin(monkeypatch):
     return ops_admin_mock_client(monkeypatch, True, role="platform-admin")
 
 
-def ldap_mock_client(monkeypatch, user_exists):
+def ldap_mock_client(monkeypatch, user_exists, is_in_ad=True):
     from app.services.data_providers.ldap_client import LdapClient
 
     class LdapClientMock:
         user_data = ""
         user_exists = ""
+        is_in_ad = True
 
         def __init__(self, *args, **kwargs):
             pass
@@ -107,7 +110,7 @@ def ldap_mock_client(monkeypatch, user_exists):
             pass
 
         def is_account_in_ad(self, email):
-            return True
+            return self.is_in_ad
 
         def format_group_dn(self, group_name):
             return group_name
@@ -121,6 +124,7 @@ def ldap_mock_client(monkeypatch, user_exists):
     ldap_mock_client = LdapClientMock()
     ldap_mock_client.user_data = {'username': 'testuser', 'email': 'testuser@example.com'}
     ldap_mock_client.user_exists = user_exists
+    ldap_mock_client.is_in_ad = is_in_ad
     monkeypatch.setattr(LdapClient, 'connect', ldap_mock_client.connect)
     monkeypatch.setattr(LdapClient, 'is_account_in_ad', ldap_mock_client.is_account_in_ad)
     monkeypatch.setattr(LdapClient, 'format_group_dn', ldap_mock_client.format_group_dn)
@@ -134,8 +138,18 @@ def ldap_mock(monkeypatch):
 
 
 @pytest.fixture
+def ldap_mock_not_in_ad(monkeypatch):
+    return ldap_mock_client(monkeypatch, True, is_in_ad=False)
+
+
+@pytest.fixture
 def ldap_mock_no_user(monkeypatch):
     return ldap_mock_client(monkeypatch, False)
+
+
+@pytest.fixture
+def patch_attachment(monkeypatch):
+    monkeypatch.setattr(ConfigSettings, 'INVITE_ATTACHMENT', 'attachments/invite_attachment.pdf')
 
 
 @pytest.mark.dependency()
@@ -159,7 +173,7 @@ def test_create_invitation_exists_in_ad(test_client, httpx_mock, ldap_mock, ops_
         'email': 'test1@example.com',
         'platform_role': 'member',
         'relationship': {
-            'project_geid': 'fakeprojectgeid',
+            'project_code': 'fakeproject',
             'project_role': 'admin',
             'inviter': 'admin',
         },
@@ -190,7 +204,7 @@ def test_create_invitation_no_ad(test_client, httpx_mock, ldap_mock, ops_admin_m
         'email': 'test2@example.com',
         'platform_role': 'member',
         'relationship': {
-            'project_geid': 'fakeprojectgeid',
+            'project_code': 'fakeproject',
             'project_role': 'admin',
             'inviter': 'admin',
         },
@@ -244,7 +258,7 @@ def test_create_invitation_already_exists_in_project(test_client, httpx_mock, ld
         'email': 'test2@example.com',
         'platform_role': 'member',
         'relationship': {
-            'project_geid': 'fakeprojectgeid',
+            'project_code': 'fakeproject',
             'project_role': 'admin',
             'inviter': 'admin',
         },
@@ -255,18 +269,54 @@ def test_create_invitation_already_exists_in_project(test_client, httpx_mock, ld
     assert response.json()['result'] == 'Invitation for this user already exists'
 
 
+def test_create_invitation_not_in_ad(
+    test_client,
+    httpx_mock,
+    ldap_mock_not_in_ad,
+    ops_admin_mock_no_user,
+    patch_attachment
+):
+    httpx_mock.add_response(
+        method='POST',
+        url=ConfigSettings.NEO4J_SERVICE + 'nodes/Container/query',
+        json=[
+            {
+                'global_entity_id': 'fakeprojectgeid',
+                'name': 'Fake Project',
+                'code': 'fakeproject',
+            }
+        ],
+        status_code=200,
+    )
+    httpx_mock.add_response(
+        method='POST', url=ConfigSettings.EMAIL_SERVICE, json={'result': 'success'}, status_code=200
+    )
+    payload = {
+        'email': 'test3@example.com',
+        'platform_role': 'member',
+        'relationship': {
+            'project_code': 'fakeproject',
+            'project_role': 'admin',
+            'inviter': 'admin',
+        },
+        'invited_by': 'admin',
+    }
+    response = test_client.post('/v1/invitations', json=payload)
+    assert response.status_code == 200
+
+
 @pytest.mark.dependency(depends=['test_create_invitation_exists_in_ad'])
 def test_get_invite_list(test_client, httpx_mock):
     payload = {
         'page': 0,
         'page_size': 1,
         'filters': {
-            'project_id': 'fakeprojectgeid',
+            'project_code': 'fakeproject',
         },
     }
     response = test_client.post('/v1/invitation-list', json=payload)
     assert response.status_code == 200
-    assert response.json()['result'][0]['project_id'] == 'fakeprojectgeid'
+    assert response.json()['result'][0]['project_code'] == 'fakeproject'
 
 
 @pytest.mark.dependency(depends=['test_create_invitation_exists_in_ad'])
@@ -280,7 +330,7 @@ def test_get_invite_list_filter(test_client, httpx_mock):
     }
     response = test_client.post('/v1/invitation-list', json=payload)
     assert response.status_code == 200
-    assert response.json()['result'][0]['project_id'] == 'fakeprojectgeid'
+    assert response.json()['result'][0]['project_code'] == 'fakeproject'
 
 
 @pytest.mark.dependency(depends=['test_create_invitation_exists_in_ad'])
@@ -330,12 +380,12 @@ def test_check_invite_email(test_client, httpx_mock, ops_admin_mock):
         status_code=200,
     )
     payload = {
-        'project_geid': 'fakeprojectgeid',
+        'project_code': 'fakeproject',
     }
     response = test_client.get('/v1/invitation/check/testuser@example.com', params=payload)
     assert response.status_code == 200
     assert response.json()['result']['role'] == user_json['role']
-    assert response.json()['result']['relationship']['project_geid'] == 'fakeprojectgeid'
+    assert response.json()['result']['relationship']['project_code'] == 'fakeproject'
 
 
 def test_check_invite_email_bad_project_id(test_client, httpx_mock, ops_admin_mock):
@@ -343,11 +393,11 @@ def test_check_invite_email_bad_project_id(test_client, httpx_mock, ops_admin_mo
         method='POST', url=ConfigSettings.NEO4J_SERVICE + 'nodes/Container/query', json=[], status_code=200
     )
     payload = {
-        'project_geid': 'fakeprojectgeid',
+        'project_code': 'badcode',
     }
     response = test_client.get('/v1/invitation/check/testuser@example.com', params=payload)
     assert response.status_code == 404
-    assert response.json()['error_msg'] == 'Project not found: fakeprojectgeid'
+    assert response.json()['error_msg'] == 'Project not found: badcode'
 
 
 def test_check_invite_email_no_relation(test_client, httpx_mock, ops_admin_mock_no_relation):
@@ -364,7 +414,7 @@ def test_check_invite_email_no_relation(test_client, httpx_mock, ops_admin_mock_
         status_code=200,
     )
     payload = {
-        'project_geid': 'fakeprojectgeid',
+        'project_code': 'fakeproject',
     }
     response = test_client.get('/v1/invitation/check/testuser@example.com', params=payload)
     assert response.status_code == 200
@@ -377,16 +427,17 @@ def test_check_invite_email_platform_admin(test_client, httpx_mock, ops_admin_mo
         method='POST', url=ConfigSettings.NEO4J_SERVICE + 'nodes/Container/query', json=[{}], status_code=200
     )
     payload = {
-        'project_geid': 'fakeprojectgeid',
+        'project_code': 'fakeproject',
     }
     response = test_client.get('/v1/invitation/check/testuser@example.com', params=payload)
     assert response.status_code == 200
     assert response.json()['result']['role'] == 'admin'
     assert response.json()['result']['relationship'] == {}
 
+
 def test_check_invite_no_user(test_client, httpx_mock, ops_admin_mock_no_user):
     payload = {
-        'project_geid': 'fakeprojectgeid',
+        'project_code': 'fakeproject',
     }
     response = test_client.get('/v1/invitation/check/testuser@example.com', params=payload)
     assert response.status_code == 404
@@ -398,7 +449,7 @@ def test_invite_create_for_update(test_client, httpx_mock, ldap_mock, ops_admin_
     httpx_mock.add_response(
         method='POST', url=ConfigSettings.EMAIL_SERVICE, json={'result': 'success'}, status_code=200
     )
-    payload = {'email': f'event@test.com', 'platform_role': 'admin', 'invited_by': 'admin'}
+    payload = {'email': 'event@test.com', 'platform_role': 'admin', 'invited_by': 'admin'}
     response = test_client.post('/v1/invitations', json=payload)
     assert response.status_code == 200
 
@@ -411,7 +462,7 @@ def test_invite_update(test_client, httpx_mock, ops_admin_mock):
         'order_by': 'email',
         'order_type': 'desc',
         'filters': {
-            'email': f'event@test.com',
+            'email': 'event@test.com',
         },
     }
     response = test_client.post('/v1/invitation-list', json=payload)
@@ -427,7 +478,7 @@ def test_invite_update(test_client, httpx_mock, ops_admin_mock):
     payload = {
         'invitation_id': invite_id,
     }
-    response = test_client.get(f'/v1/events', params=payload)
+    response = test_client.get('/v1/events', params=payload)
     assert response.status_code == 200
     assert response.json()["result"][0]["target_user"] == user_json["username"]
     assert response.json()["result"][0]["target_user_id"] == str(user_json["id"])
