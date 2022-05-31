@@ -24,7 +24,6 @@ pipeline {
         when { branch 'develop' }
         steps {
             withCredentials([
-                usernamePassword(credentialsId: 'readonly', usernameVariable: 'PIP_USERNAME', passwordVariable: 'PIP_PASSWORD'),
                 string(credentialsId:'VAULT_TOKEN', variable: 'VAULT_TOKEN'),
                 string(credentialsId:'VAULT_URL', variable: 'VAULT_URL'),
                 file(credentialsId:'VAULT_CRT', variable: 'VAULT_CRT')
@@ -32,7 +31,6 @@ pipeline {
                 sh """
                 pip install --user poetry==1.1.12
                 ${HOME}/.local/bin/poetry config virtualenvs.in-project true
-                ${HOME}/.local/bin/poetry config http-basic.pilot ${PIP_USERNAME} ${PIP_PASSWORD}
                 ${HOME}/.local/bin/poetry install --no-root --no-interaction
                 ${HOME}/.local/bin/poetry run pytest --verbose -c tests/pytest.ini
                 """
@@ -44,12 +42,10 @@ pipeline {
       when {branch "develop"}
       steps{
         script {
-            withCredentials([usernamePassword(credentialsId:'readonly', usernameVariable: 'PIP_USERNAME', passwordVariable: 'PIP_PASSWORD')]) {
-                docker.withRegistry('https://ghcr.io', registryCredential) {
-                    customImage = docker.build("$imagename_dev:$commit", "--build-arg PIP_USERNAME=${PIP_USERNAME} --build-arg PIP_PASSWORD=${PIP_PASSWORD} --add-host git.indocresearch.org:10.4.3.151 .")
-                    customImage.push()
-                }
-            }
+          docker.withRegistry('https://ghcr.io', registryCredential) {
+              customImage = docker.build("$imagename_dev:$commit", "--add-host git.indocresearch.org:10.4.3.151 .")
+              customImage.push()
+          }
         }
       }
     }
@@ -86,12 +82,10 @@ pipeline {
       when {branch "main"}
       steps{
         script {
-            withCredentials([usernamePassword(credentialsId:'readonly', usernameVariable: 'PIP_USERNAME', passwordVariable: 'PIP_PASSWORD')]) {
-                docker.withRegistry('https://ghcr.io', registryCredential) {
-                    customImage = docker.build("$imagename_staging:$commit", "--build-arg PIP_USERNAME=${PIP_USERNAME} --build-arg PIP_PASSWORD=${PIP_PASSWORD} --add-host git.indocresearch.org:10.4.3.151 .")
-                    customImage.push()
-                }
-            }
+          docker.withRegistry('https://ghcr.io', registryCredential) {
+              customImage = docker.build("$imagename_staging:$commit", "--add-host git.indocresearch.org:10.4.3.151 .")
+              customImage.push()
+          }
         }
       }
     }
