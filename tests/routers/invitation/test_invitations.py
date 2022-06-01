@@ -17,6 +17,7 @@ import time
 from uuid import uuid4
 
 import pytest
+from common import ProjectClient, ProjectNotFoundException
 
 from app.config import ConfigSettings
 
@@ -31,6 +32,22 @@ user_json = {
     'username': 'testuser',
     'attributes': {'status': ['active']},
 }
+
+
+PROJECT_DATA = {
+    "id": str(uuid4()),
+    "name": "Fake project",
+    "code": "fakeproject",
+}
+
+
+class FakeProjectObject(object):
+    id = PROJECT_DATA["code"]
+    code = PROJECT_DATA["code"]
+    name = PROJECT_DATA["code"]
+
+    async def json(self):
+        return PROJECT_DATA
 
 
 def ops_admin_mock_client(monkeypatch, user_exists, relation=True, role="fakeproject-admin"):
@@ -153,19 +170,9 @@ def patch_attachment(monkeypatch):
 
 
 @pytest.mark.dependency()
-def test_create_invitation_exists_in_ad(test_client, httpx_mock, ldap_mock, ops_admin_mock_no_user):
-    httpx_mock.add_response(
-        method='POST',
-        url=ConfigSettings.NEO4J_SERVICE + 'nodes/Container/query',
-        json=[
-            {
-                'global_entity_id': 'fakeprojectgeid',
-                'name': 'Fake Project',
-                'code': 'fakeproject',
-            }
-        ],
-        status_code=200,
-    )
+def test_create_invitation_exists_in_ad(test_client, httpx_mock, ldap_mock, ops_admin_mock_no_user, mocker):
+    mocker.patch.object(ProjectClient, 'get', return_value=FakeProjectObject())
+
     httpx_mock.add_response(
         method='POST', url=ConfigSettings.EMAIL_SERVICE, json={'result': 'success'}, status_code=200
     )
@@ -184,19 +191,9 @@ def test_create_invitation_exists_in_ad(test_client, httpx_mock, ldap_mock, ops_
 
 
 @pytest.mark.dependency()
-def test_create_invitation_no_ad(test_client, httpx_mock, ldap_mock, ops_admin_mock_no_user):
-    httpx_mock.add_response(
-        method='POST',
-        url=ConfigSettings.NEO4J_SERVICE + 'nodes/Container/query',
-        json=[
-            {
-                'global_entity_id': 'fakeprojectgeid',
-                'name': 'Fake Project',
-                'code': 'fakeproject',
-            }
-        ],
-        status_code=200,
-    )
+def test_create_invitation_no_ad(test_client, httpx_mock, ldap_mock, ops_admin_mock_no_user, mocker):
+    mocker.patch.object(ProjectClient, 'get', return_value=FakeProjectObject())
+
     httpx_mock.add_response(
         method='POST', url=ConfigSettings.EMAIL_SERVICE, json={'result': 'success'}, status_code=200
     )
@@ -214,7 +211,8 @@ def test_create_invitation_no_ad(test_client, httpx_mock, ldap_mock, ops_admin_m
     assert response.status_code == 200
 
 
-def test_create_invitation_no_relation(test_client, httpx_mock, ldap_mock_no_user, ops_admin_mock_no_user):
+def test_create_invitation_no_relation(test_client, httpx_mock, ldap_mock_no_user, ops_admin_mock_no_user, mocker):
+    mocker.patch.object(ProjectClient, 'get', return_value=FakeProjectObject())
     httpx_mock.add_response(
         method='POST', url=ConfigSettings.EMAIL_SERVICE, json={'result': 'success'}, status_code=200
     )
@@ -223,7 +221,8 @@ def test_create_invitation_no_relation(test_client, httpx_mock, ldap_mock_no_use
     assert response.status_code == 200
 
 
-def test_create_invitation_admin(test_client, httpx_mock, ldap_mock_no_user, ops_admin_mock_no_user):
+def test_create_invitation_admin(test_client, httpx_mock, ldap_mock_no_user, ops_admin_mock_no_user, mocker):
+    mocker.patch.object(ProjectClient, 'get', return_value=FakeProjectObject())
     httpx_mock.add_response(
         method='POST', url=ConfigSettings.EMAIL_SERVICE, json={'result': 'success'}, status_code=200
     )
@@ -241,19 +240,8 @@ def test_create_invitation_admin_already_exists(test_client, httpx_mock, ldap_mo
 
 
 @pytest.mark.dependency(depends=['test_create_invitation_no_ad'])
-def test_create_invitation_already_exists_in_project(test_client, httpx_mock, ldap_mock, ops_admin_mock):
-    httpx_mock.add_response(
-        method='POST',
-        url=ConfigSettings.NEO4J_SERVICE + 'nodes/Container/query',
-        json=[
-            {
-                'global_entity_id': 'fakeprojectgeid',
-                'name': 'Fake Project',
-                'code': 'fakeproject',
-            }
-        ],
-        status_code=200,
-    )
+def test_create_invitation_already_exists_in_project(test_client, httpx_mock, ldap_mock, ops_admin_mock, mocker):
+    mocker.patch.object(ProjectClient, 'get', return_value=FakeProjectObject())
     payload = {
         'email': 'test2@example.com',
         'platform_role': 'member',
@@ -274,20 +262,11 @@ def test_create_invitation_not_in_ad(
     httpx_mock,
     ldap_mock_not_in_ad,
     ops_admin_mock_no_user,
-    patch_attachment
+    patch_attachment,
+    mocker,
 ):
-    httpx_mock.add_response(
-        method='POST',
-        url=ConfigSettings.NEO4J_SERVICE + 'nodes/Container/query',
-        json=[
-            {
-                'global_entity_id': 'fakeprojectgeid',
-                'name': 'Fake Project',
-                'code': 'fakeproject',
-            }
-        ],
-        status_code=200,
-    )
+    mocker.patch.object(ProjectClient, 'get', return_value=FakeProjectObject())
+
     httpx_mock.add_response(
         method='POST', url=ConfigSettings.EMAIL_SERVICE, json={'result': 'success'}, status_code=200
     )
@@ -366,19 +345,8 @@ def test_get_invite_list_order(test_client, httpx_mock, ldap_mock, ops_admin_moc
     assert response.json()['result'][2]['email'] == f'a@ordertest_{timestamp}.com'
 
 
-def test_check_invite_email(test_client, httpx_mock, ops_admin_mock):
-    httpx_mock.add_response(
-        method='POST',
-        url=ConfigSettings.NEO4J_SERVICE + 'nodes/Container/query',
-        json=[
-            {
-                'global_entity_id': 'fakeprojectgeid',
-                'name': 'Fake Project',
-                'code': 'fakeproject',
-            }
-        ],
-        status_code=200,
-    )
+def test_check_invite_email(test_client, httpx_mock, ops_admin_mock, mocker):
+    mocker.patch.object(ProjectClient, 'get', return_value=FakeProjectObject())
     payload = {
         'project_code': 'fakeproject',
     }
@@ -388,31 +356,20 @@ def test_check_invite_email(test_client, httpx_mock, ops_admin_mock):
     assert response.json()['result']['relationship']['project_code'] == 'fakeproject'
 
 
-def test_check_invite_email_bad_project_id(test_client, httpx_mock, ops_admin_mock):
-    httpx_mock.add_response(
-        method='POST', url=ConfigSettings.NEO4J_SERVICE + 'nodes/Container/query', json=[], status_code=200
-    )
+def test_check_invite_email_bad_project_id(test_client, httpx_mock, ops_admin_mock, mocker):
+    mocker.patch.object(ProjectClient, 'get', side_effect=ProjectNotFoundException())
+
     payload = {
         'project_code': 'badcode',
     }
     response = test_client.get('/v1/invitation/check/testuser@example.com', params=payload)
+    print(response.json())
     assert response.status_code == 404
-    assert response.json()['error_msg'] == 'Project not found: badcode'
+    assert response.json()['error_msg'] == 'Project not found'
 
 
-def test_check_invite_email_no_relation(test_client, httpx_mock, ops_admin_mock_no_relation):
-    httpx_mock.add_response(
-        method='POST',
-        url=ConfigSettings.NEO4J_SERVICE + 'nodes/Container/query',
-        json=[
-            {
-                'global_entity_id': 'fakeprojectgeid',
-                'name': 'Fake Project',
-                'code': 'fakeproject',
-            }
-        ],
-        status_code=200,
-    )
+def test_check_invite_email_no_relation(test_client, httpx_mock, ops_admin_mock_no_relation, mocker):
+    mocker.patch.object(ProjectClient, 'get', return_value=FakeProjectObject())
     payload = {
         'project_code': 'fakeproject',
     }
@@ -422,10 +379,8 @@ def test_check_invite_email_no_relation(test_client, httpx_mock, ops_admin_mock_
     assert response.json()['result']['relationship'] == {}
 
 
-def test_check_invite_email_platform_admin(test_client, httpx_mock, ops_admin_mock_admin):
-    httpx_mock.add_response(
-        method='POST', url=ConfigSettings.NEO4J_SERVICE + 'nodes/Container/query', json=[{}], status_code=200
-    )
+def test_check_invite_email_platform_admin(test_client, httpx_mock, ops_admin_mock_admin, mocker):
+    mocker.patch.object(ProjectClient, 'get', return_value=FakeProjectObject())
     payload = {
         'project_code': 'fakeproject',
     }

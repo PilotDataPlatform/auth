@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from common import ProjectException
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -53,6 +54,13 @@ def create_app():
 
     @app.exception_handler(APIException)
     async def http_exception_handler(request: Request, exc: APIException):
+        return JSONResponse(
+            status_code=exc.status_code,
+            content=exc.content,
+        )
+
+    @app.exception_handler(ProjectException)
+    async def project_exception_handler(request: Request, exc: APIException):
         return JSONResponse(
             status_code=exc.status_code,
             content=exc.content,

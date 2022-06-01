@@ -13,7 +13,7 @@ certifi = "^2021.10.8"
 cffi = "1.15.0"
 chardet = "3.0.4"
 click = "7.1.2"
-pilot-platform-common = "0.0.25"
+pilot-platform-common = "0.0.28"
 docopt = "0.6.2"
 gunicorn = "20.0.4"
 hdfs = "2.5.8"
@@ -59,7 +59,6 @@ pytest-env = "^0.6.2"
 pytest-mock = "^3.7.0"
 mock = "4.0.3"
 sqlalchemy-utils = "0.38.2"
-testcontainers = "3.4.2"
 
 
 [tool.pytest.ini_options]
