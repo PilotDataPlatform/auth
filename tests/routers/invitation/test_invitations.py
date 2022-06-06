@@ -41,10 +41,10 @@ PROJECT_DATA = {
 }
 
 
-class FakeProjectObject(object):
-    id = PROJECT_DATA["code"]
+class FakeProjectObject:
+    id = PROJECT_DATA["id"]
     code = PROJECT_DATA["code"]
-    name = PROJECT_DATA["code"]
+    name = PROJECT_DATA["name"]
 
     async def json(self):
         return PROJECT_DATA
@@ -363,7 +363,6 @@ def test_check_invite_email_bad_project_id(test_client, httpx_mock, ops_admin_mo
         'project_code': 'badcode',
     }
     response = test_client.get('/v1/invitation/check/testuser@example.com', params=payload)
-    print(response.json())
     assert response.status_code == 404
     assert response.json()['error_msg'] == 'Project not found'
 
