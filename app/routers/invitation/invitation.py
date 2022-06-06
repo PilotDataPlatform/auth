@@ -48,7 +48,7 @@ class Invitation:
         summary='Creates an new invitation',
         tags=[_API_TAG]
     )
-    def create_invitation(self, data: InvitationPOST):
+    async def create_invitation(self, data: InvitationPOST):
         self._logger.info('Called create_invitation')
         res = APIResponse()
         email = data.email
@@ -59,7 +59,7 @@ class Invitation:
         project = None
         if relation_data:
             if relation_data.get('project_code'):
-                project = get_project_by_code(relation_data.get('project_code'))
+                project = await get_project_by_code(relation_data.get('project_code'))
             query = {'project_code': project['code'], 'email': email}
             if query_invites(query):
                 res.result = 'Invitation for this user already exists'
@@ -121,7 +121,7 @@ class Invitation:
         summary="This method allow to get user's detail on the platform.",
         tags=[_API_TAG]
     )
-    def check_user(self, email: str, project_code: str = ''):
+    async def check_user(self, email: str, project_code: str = ''):
         self._logger.info('Called check_user')
         res = APIResponse()
         admin_client = OperationsAdmin(ConfigSettings.KEYCLOAK_REALM)
@@ -140,7 +140,7 @@ class Invitation:
                 return res.json_response()
             raise APIException(status_code=EAPIResponseCode.not_found.value, error_msg='User not found in keycloak')
         if project_code:
-            project = get_project_by_code(project_code)
+            project = await get_project_by_code(project_code)
 
         roles = admin_client.get_user_realm_roles(user_info['id'])
         platform_role = 'member'

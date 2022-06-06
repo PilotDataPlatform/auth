@@ -5,7 +5,7 @@ description = ""
 authors = ["Indoc Research <admin@indocresearch.org>"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.9"
 aniso8601 = "8.0.0"
 casbin = "1.1.1"
 casbin_sqlalchemy_adapter = "0.3.1"
@@ -13,7 +13,7 @@ certifi = "^2021.10.8"
 cffi = "1.15.0"
 chardet = "3.0.4"
 click = "7.1.2"
-pilot-platform-common = "0.0.25"
+pilot-platform-common = "0.0.28"
 docopt = "0.6.2"
 gunicorn = "20.0.4"
 hdfs = "2.5.8"

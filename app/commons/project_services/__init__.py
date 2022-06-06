@@ -13,16 +13,12 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import httpx
+from common import ProjectClient
 
 from app.config import ConfigSettings
-from app.models.api_response import EAPIResponseCode
-from app.resources.error_handler import APIException
 
 
-def get_project_by_code(code: str) -> dict:
-    payload = {'code': code}
-    response = httpx.post(ConfigSettings.NEO4J_SERVICE + 'nodes/Container/query', json=payload)
-    if not response.json():
-        raise APIException(status_code=EAPIResponseCode.not_found.value, error_msg=f'Project not found: {code}')
-    return response.json()[0]
+async def get_project_by_code(code: str) -> dict:
+    project_client = ProjectClient(ConfigSettings.PROJECT_SERVICE, ConfigSettings.REDIS_URL)
+    project = await project_client.get(code=code)
+    return await project.json()

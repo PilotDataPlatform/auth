@@ -61,8 +61,8 @@ class Settings(BaseSettings):
     env: str = ''
     namespace: str = ''
 
-    NEO4J_SERVICE: str
     EMAIL_SERVICE: str
+    PROJECT_SERVICE: str
 
     EMAIL_SUPPORT: str
     EMAIL_ADMIN: str
@@ -118,6 +118,10 @@ class Settings(BaseSettings):
     INVITE_ATTACHMENT_NAME: str = ""
     INVITATION_URL_LOGIN: str
 
+    REDIS_HOST: str
+    REDIS_PORT: str
+    REDIS_PASSWORD: str
+
     FLASK: FlaskConfig = FlaskConfig()
 
     class Config:
@@ -131,9 +135,8 @@ class Settings(BaseSettings):
 
     def __init__(self, *args: Any, **kwds: Any) -> None:
         super().__init__(*args, **kwds)
-
-        self.NEO4J_SERVICE += '/v1/neo4j/'
         self.EMAIL_SERVICE += '/v1/email/'
+        self.REDIS_URL = f"redis://:{self.REDIS_PASSWORD}@{self.REDIS_HOST}:{self.REDIS_PORT}"
 
 
 @lru_cache(1)
