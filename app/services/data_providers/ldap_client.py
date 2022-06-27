@@ -55,7 +55,7 @@ class LdapClient:
     def format_group_dn(self, group_name: str) -> str:
         '''
         Summary:
-            format the dn as  cn=<prefix>-<group_name>, ou=Gruppen, ou=<>, dc=<>, dc=<>
+            format the dn as  cn=<prefix>-<group_name>, ou=<>, dc=<>, dc=<>
 
         Parameter:
             group_name(string): the group name that will be added
@@ -67,7 +67,6 @@ class LdapClient:
         group_dn = ','.join(
             [
                 f'cn={ConfigSettings.LDAP_COMMON_NAME_PREFIX}-{group_name}',
-                'ou=Gruppen',
                 f'ou={ConfigSettings.LDAP_OU}',
                 f'dc={ConfigSettings.LDAP_DC1}',
                 f'dc={ConfigSettings.LDAP_DC2}',
