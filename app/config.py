@@ -78,6 +78,7 @@ class Settings(BaseSettings):
     LDAP_objectclass: str
     LDAP_USER_GROUP: str
     LDAP_COMMON_NAME_PREFIX: str
+    LDAP_USER_OBJECTCLASS: str
 
     # BFF RDS
     RDS_HOST: str
