@@ -161,13 +161,13 @@ class LdapClient:
         users = self.conn.search_s(
             'dc={},dc={}'.format(ConfigSettings.LDAP_DC1, ConfigSettings.LDAP_DC2),
             ldap.SCOPE_SUBTREE,
-            f'(&(objectClass=user)(sAMAccountName={username}))',
+            f'(&(objectClass=user)({ConfigSettings.LDAP_USER_OBJECTCLASS}={username}))',
         )
 
         user_found = None
         for user_dn, entry in users:
-            if 'sAMAccountName' in entry:
-                decoded_username = entry['sAMAccountName'][0].decode('utf-8')
+            if ConfigSettings.LDAP_USER_OBJECTCLASS in entry:
+                decoded_username = entry[ConfigSettings.LDAP_USER_OBJECTCLASS][0].decode('utf-8')
                 if decoded_username == username:
                     user_found = (user_dn, entry)
 
