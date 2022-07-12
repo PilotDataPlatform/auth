@@ -3,6 +3,8 @@ name: Build and Publish
 on:
   push:
     branches: [ develop ]
+  pull_request:
+    branches: [ main, develop ]
 
 defaults:
   build-and-push-docker-image:
