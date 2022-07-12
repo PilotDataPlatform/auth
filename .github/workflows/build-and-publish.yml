@@ -22,7 +22,6 @@ jobs:
           registry: ghcr.io
           username: indoc-devops
           password: ${{ secrets.GHCR_PAT }}
-
       - name: Build image and push to Docker Hub and GitHub Container Registry
         uses: docker/build-push-action@v2
         with:
