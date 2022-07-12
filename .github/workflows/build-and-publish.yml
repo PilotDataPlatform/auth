@@ -10,8 +10,6 @@ jobs:
   build-and-push-docker-image:
     name: Build Docker image and push to repositories
     runs-on: ubuntu-latest
-    env:
-      commit_SHA: ${GITHUB_SHA:7}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -24,18 +22,24 @@ jobs:
           registry: ghcr.io
           username: indoc-devops
           password: ${{ secrets.GHCR_PAT }}
-      - name: show the commit sha for the image tag
-        run: echo ${GITHUB_SHA:7}
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          # list of Docker images to use as base name for tags
+          images: |
+            ghcr.io/pilotdataplatform/auth
+          # generate Docker tags based on the following events/attributes
+          tags: |
+            type=sha
+      - name: Image digest
+        run: echo ${{ steps.meta.outputs.tags }}
       - name: Build image and push to GitHub Container Registry
         uses: docker/build-push-action@v2
         with:
           # relative path to the place where source code with Dockerfile is located
           context: .
           # Note: tags has to be all lower-case
-          tags: |
-            ghcr.io/pilotdataplatform/auth:$commit_SHA
+          tags: ${{ steps.meta.outputs.tags }}
           # build on feature branches, push only on main branch
           push: ${{ github.ref == 'refs/heads/develop' }}
-
-      - name: Image digest
-        run: echo ${{ steps.docker_build.outputs.digest }}
