@@ -31,7 +31,7 @@ jobs:
             ghcr.io/pilotdataplatform/auth
           # generate Docker tags based on the following events/attributes
           tags: |
-            type=sha
+            type=sha,enable=true,prefix=,suffix=,format=short
       - name: Image digest
         run: echo ${{ steps.meta.outputs.tags }}
       - name: Build image and push to GitHub Container Registry
