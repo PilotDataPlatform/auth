@@ -18,6 +18,8 @@ jobs:
     env:
       commit_SHA: ${GITHUB_SHA:7}
     steps:
+      - name: echo commit sha
+        run: echo $commit_SHA
       - name: Trigger jenkins job with parameters
         uses: toptal/jenkins-job-trigger-action@master
         with:
@@ -29,6 +31,6 @@ jobs:
             {
               "TF_TARGET_ENV": "dev",
               "TARGET_RELEASE": "auth",
-              "NEW_APP_VERSION": "${{ github.event.workflow_run.head_sha }}"
+              "NEW_APP_VERSION": "$commit_SHA"
             }
           job_timeout: "30"
