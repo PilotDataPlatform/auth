@@ -1,10 +1,6 @@
 name: Trigger Jenkins
 
 on:
-  push:
-    branches: [ develop ]
-  pull_request:
-    branches: [ main, develop ]
   workflow_run:
     workflows: ["Build and Publish"]
     types:
@@ -15,10 +11,8 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: Trigger jenkins job
     runs-on: ubuntu-latest
-    env:
-      commit_SHA: ${GITHUB_SHA:7}
     steps:
       - name: echo commit sha
-        run: echo "${{ github.event.workflow_run.head_sha }}" && echo ${commit_SHA}
+        run:  full_commit_SHA="${{ github.event.workflow_run.head_sha }}" && short_commit_SHA=$(echo "${full_commit_SHA:0:7}") && echo $short_commit_SHA
       - name: trigger the jenkins pipeline with curl
-        run: curl -X POST -m 60 -L --user jenkins:${{ secrets.JENKINS_API_TOKEN }} https://ci.dev.pilot.indocresearch.org/job/Infra/job/UpdateAppVersion/buildWithParameters --data TF_TARGET_ENV=dev --data TARGET_RELEASE=auth --data NEW_APP_VERSION="${{ github.event.workflow_run.head_sha }}"
+        run: location=$(curl -i -X POST -m 60 -L --user jenkins:${{ secrets.JENKINS_API_TOKEN }} https://ci.dev.pilot.indocresearch.org/job/Infra/job/UpdateAppVersion/buildWithParameters --data TF_TARGET_ENV=dev --data TARGET_RELEASE=auth --data NEW_APP_VERSION="$short_commit_SHA" | grep location | cut -d " " -f2) && echo $location
