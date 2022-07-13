@@ -24,7 +24,7 @@ jobs:
           jenkins_url: https://ci.dev.pilot.indocresearch.org
           job_name: "UpdateAppVersion"
           jenkins_user: jenkins
-          jenkins_token: 1135715b945bbc338da7a94cbbea8e265e
+          jenkins_token: ${{ secrets.JENKINS_API_TOKEN }}
           job_params: |
             {
               "TF_TARGET_ENV": "dev",
