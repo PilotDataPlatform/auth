@@ -1,0 +1,34 @@
+name: Trigger Jenkins
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_run:
+    workflows: ["Build and Publish"]
+    types:
+      - completed
+
+jobs:
+  Trigger:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    name: Trigger jenkins job
+    runs-on: ubuntu-latest
+    env:
+      commit_SHA: ${GITHUB_SHA:7}
+    steps:
+      - name: Trigger jenkins job with parameters
+        uses: toptal/jenkins-job-trigger-action@master
+        with:
+          jenkins_url: https://ci.dev.pilot.indocresearch.org
+          job_name: "UpdateAppVersion"
+          jenkins_user: jenkins
+          jenkins_token: 1135715b945bbc338da7a94cbbea8e265e
+          job_params: |
+            {
+              "TF_TARGET_ENV": "dev",
+              "TARGET_RELEASE": "auth",
+              "NEW_APP_VERSION": "${{ github.event.workflow_run.head_sha }}"
+            }
+          job_timeout: "30"
