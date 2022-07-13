@@ -12,7 +12,7 @@ on:
 
 jobs:
   Trigger:
-    #if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: Trigger jenkins job
     runs-on: ubuntu-latest
     env:
@@ -21,19 +21,4 @@ jobs:
       - name: echo commit sha
         run: echo "${{ github.event.workflow_run.head_sha }}" && echo ${commit_SHA}
       - name: trigger the jenkins pipeline with curl
-        run: curl -X POST -L --user jenkins:${{ secrets.JENKINS_API_TOKEN }} https://ci.dev.pilot.indocresearch.org/job/Infra/job/UpdateAppVersion/buildWithParameters --data TF_TARGET_ENV=dev --data TARGET_RELEASE=auth --data NEW_APP_VERSION=${commit_SHA}
-      # - name: Trigger jenkins job with parameters
-      #   uses: toptal/jenkins-job-trigger-action@master
-      #   with:
-      #     jenkins_url: https://ci.dev.pilot.indocresearch.org
-      #     job_name: "UpdateAppVersion"
-      #     jenkins_user: jenkins
-      #     jenkins_token: ${{ secrets.JENKINS_API_TOKEN }}
-      #     job_params: |
-      #       {
-      #         "TF_TARGET_ENV": "dev",
-      #         "TARGET_RELEASE": "auth",
-      ##        "NEW_APP_VERSION": "${{ github.event.workflow_run.head_sha }}"
-      #         "NEW_APP_VERSION": "$commit_SHA"
-      #       }
-      #     job_timeout: "30"
+        run: curl -X POST -m 60 -L --user jenkins:${{ secrets.JENKINS_API_TOKEN }} https://ci.dev.pilot.indocresearch.org/job/Infra/job/UpdateAppVersion/buildWithParameters --data TF_TARGET_ENV=dev --data TARGET_RELEASE=auth --data NEW_APP_VERSION="${{ github.event.workflow_run.head_sha }}"
