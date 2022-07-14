@@ -39,7 +39,7 @@ jobs:
       - name: getting the result of the pipeline
         run: |
          timer=0;
-         timeout=30;
+         timeout=300;
          step=5;
          echo "https://ci.dev.pilot.indocresearch.org/job/Infra/job/UpdateAppVersion/${{ env.build_number }}/api/json"
          result=$(curl --silent --user jenkins:${{ secrets.JENKINS_API_TOKEN }} -X GET "https://ci.dev.pilot.indocresearch.org/job/Infra/job/UpdateAppVersion/${{ env.build_number }}/api/json" | grep -Eo '"result"[^,]*' | grep -Eo '[^:]*$' |  tr -d '"')
