@@ -28,16 +28,18 @@ jobs:
           link=${location}api/json && echo $link && echo -n "location_link=$link" >> $GITHUB_ENV
       - name: getting the json
         run: |
-          sleep 1
+          sleep 10
           curl --silent -o output.json --user jenkins:${{ secrets.JENKINS_API_TOKEN }} -X GET "${{ env.location_link }}"
-          cat output.json && pwd
+          cat output.json
       - name: getting the build number
         uses: sergeysova/jq-action@v2
         id: build_number
         with:
           cmd: |
+            ls && pwd
+            echo "------------"
             cd /github/workspace
-            pwd && ls && cat output.json
+            ls && cat output.json
             build_num=$(jq .executable.number output.json -r)
             echo $build_num && echo "build_number=$build_num" >> $GITHUB_ENV
 
