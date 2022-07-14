@@ -27,7 +27,9 @@ jobs:
           location=$(cat output.txt | grep location | cut -d " " -f2 | sed 's/\r//')
           link=${location}api/json && echo $link && echo -n "location_link=$link" >> $GITHUB_ENV
       - name: getting the build number
-        run: build_number=$(curl --silent --user jenkins:${{ secrets.JENKINS_API_TOKEN }} -X GET "${{ env.location_link }}" | grep -Eo '"number"[^,]*' | grep -Eo '[^:]*$'") && echo $build_number && echo "build_number=$build_number" >> $GITHUB_ENV
+        run: |
+          build_number=$(curl --silent --user jenkins:${{ secrets.JENKINS_API_TOKEN }} -X GET "${{ env.location_link }}" | grep -Eo '"number"[^,]*' | grep -Eo '[^:]*$')
+          echo $build_number && echo "build_number=$build_number" >> $GITHUB_ENV
       - name: getting the result of the pipeline
         run: |
          timer=0;
