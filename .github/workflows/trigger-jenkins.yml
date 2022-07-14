@@ -20,7 +20,10 @@ jobs:
         # run:  full_commit_SHA="${{ github.event.workflow_run.head_sha }}" && short_commit_SHA=$(echo "${full_commit_SHA:0:7}") && echo "SHA=$short_commit_SHA" >> $GITHUB_ENV
         run:  full_commit_SHA="${{ github.sha }}" && short_commit_SHA=$(echo "${full_commit_SHA:0:7}") && echo "SHA=$short_commit_SHA" >> $GITHUB_ENV
       - name: trigger the jenkins pipeline with curl
-        run: location=$(curl --silent -i -X POST -m 60 -L --user jenkins:${{ secrets.JENKINS_API_TOKEN }} https://ci.dev.pilot.indocresearch.org/job/Infra/job/UpdateAppVersion/buildWithParameters --data TF_TARGET_ENV=dev --data TARGET_RELEASE=auth --data NEW_APP_VERSION="${{ env.SHA }}" | grep location | cut -d " " -f2 | tr -d '\n') && link=$location/api/json && echo $link && echo -n "location_link=$link" >> $GITHUB_ENV
+        run: |
+          target_release=auth
+          env=dev
+          location=$(curl --silent -i -X POST -m 60 -L --user jenkins:${{ secrets.JENKINS_API_TOKEN }} https://ci.dev.pilot.indocresearch.org/job/Infra/job/UpdateAppVersion/buildWithParameters --data TF_TARGET_ENV=$env --data TARGET_RELEASE=$target_release --data NEW_APP_VERSION="${{ env.SHA }}" | grep location | cut -d " " -f2 | tr -d '\n') && link=${location}api/json && echo -n $link && echo -e -n "location_link=$link" >> $GITHUB_ENV
       - name: getting the build number
         run: build_number=$(curl --silent --user jenkins:${{ secrets.JENKINS_API_TOKEN }} -X GET "${{ env.location_link }} | grep -Eo '"number"[^,]*' | grep -Eo '[^:]*$'") && echo $build_number && echo "build_number=$build_number" >> $GITHUB_ENV
       - name: getting the result of the pipeline
