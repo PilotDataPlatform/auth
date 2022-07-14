@@ -32,7 +32,7 @@ jobs:
           json_out=$(curl --silent --user jenkins:${{ secrets.JENKINS_API_TOKEN }} -X GET "${{ env.location_link }}")
           echo $json_out && echo "json=$json_out" >> $GITHUB_ENV
       - name: getting the build number
-        uases: sergeysova/jq-action@v2
+        uses: sergeysova/jq-action@v2
         id: build_number
         with:
           cmd: build_num=$(echo "${{ env.json }}" | jq .executable.number) && echo $build_num && echo "build_number=$build_num" >> $GITHUB_ENV
