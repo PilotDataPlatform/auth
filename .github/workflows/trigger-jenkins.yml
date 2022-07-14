@@ -35,7 +35,7 @@ jobs:
         uses: sergeysova/jq-action@v2
         id: build_number
         with:
-          run: |
+          cmd: |
             cd /github/workspace
             pwd && ls && cat output.json
             build_num=$(jq .executable.number output.json -r)
