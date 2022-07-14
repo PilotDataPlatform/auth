@@ -35,7 +35,11 @@ jobs:
         uses: sergeysova/jq-action@v2
         id: build_number
         with:
-          cmd: build_num=$(jq .executable.number output.json -r) && pwd && echo $build_num && echo "build_number=$build_num" >> $GITHUB_ENV
+          run: |
+            cd /github/workspace
+            pwd && ls && cat output.json
+            build_num=$(jq .executable.number output.json -r)
+            echo $build_num && echo "build_number=$build_num" >> $GITHUB_ENV
 
       - name: getting the result of the pipeline
         run: |
