@@ -29,13 +29,13 @@ jobs:
       - name: getting the json
         run: |
           sleep 1
-          json_out=$(curl --silent --user jenkins:${{ secrets.JENKINS_API_TOKEN }} -X GET "${{ env.location_link }}")
-          echo $json_out && echo "json=$json_out" >> $GITHUB_ENV
+          curl --silent --user -o output.json jenkins:${{ secrets.JENKINS_API_TOKEN }} -X GET "${{ env.location_link }}"
+          cat output.json && pwd
       - name: getting the build number
         uses: sergeysova/jq-action@v2
         id: build_number
         with:
-          cmd: build_num=$(echo "${{ env.json }}" | jq .executable.number) && echo $build_num && echo "build_number=$build_num" >> $GITHUB_ENV
+          cmd: build_num=$(jq .executable.number output.json -r) && pwd && echo $build_num && echo "build_number=$build_num" >> $GITHUB_ENV
 
       - name: getting the result of the pipeline
         run: |
