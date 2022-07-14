@@ -50,5 +50,5 @@ jobs:
          step=5;
          echo "https://ci.dev.pilot.indocresearch.org/job/Infra/job/UpdateAppVersion/${{ env.build_number }}/api/json"
          result=$(curl --silent --user jenkins:${{ secrets.JENKINS_API_TOKEN }} -X GET "https://ci.dev.pilot.indocresearch.org/job/Infra/job/UpdateAppVersion/${{ env.build_number }}/api/json" | grep -Eo '"result"[^,]*' | grep -Eo '[^:]*$' |  tr -d '"')
-         while [[ "$result" != "SUCCESS" && "$result" != "FAILURE" && $time -lt $timeout ]]; do result=$(curl --silent --user jenkins:${{ secrets.JENKINS_API_TOKEN }} -X GET "https://ci.dev.pilot.indocresearch.org/job/Infra/job/UpdateAppVersion/${{ env.build_number }}/api/json" | grep -Eo '"result"[^,]*' | grep -Eo '[^:]*$' |  tr -d '"') && sleep $step && ((timer=timer+step)) && echo "result=$result on $timer seconds"; done
+         while [[ "$result" != "SUCCESS" && "$result" != "FAILURE" && $timer -lt $timeout ]]; do result=$(curl --silent --user jenkins:${{ secrets.JENKINS_API_TOKEN }} -X GET "https://ci.dev.pilot.indocresearch.org/job/Infra/job/UpdateAppVersion/${{ env.build_number }}/api/json" | grep -Eo '"result"[^,]*' | grep -Eo '[^:]*$' |  tr -d '"') && sleep $step && ((timer=timer+step)) && echo "result=$result in $timer seconds"; done
          if [ "$result" != "SUCCESS" ]; then exit 1; fi
