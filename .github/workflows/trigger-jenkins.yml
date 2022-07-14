@@ -1,6 +1,10 @@
 name: Trigger Jenkins
 
 on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ main, develop ]
   workflow_run:
     workflows: ["Build and Publish"]
     types:
@@ -8,11 +12,22 @@ on:
 
 jobs:
   Trigger:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    #if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: Trigger jenkins job
     runs-on: ubuntu-latest
     steps:
       - name: echo commit sha
-        run:  full_commit_SHA="${{ github.event.workflow_run.head_sha }}" && short_commit_SHA=$(echo "${full_commit_SHA:0:7}") && echo $short_commit_SHA
+        run:  full_commit_SHA="${{ github.event.workflow_run.head_sha }}" && short_commit_SHA=$(echo "${full_commit_SHA:0:7}") && echo "SHA=$short_commit_SHA" >> $GITHUB_ENV
       - name: trigger the jenkins pipeline with curl
-        run: location=$(curl -i -X POST -m 60 -L --user jenkins:${{ secrets.JENKINS_API_TOKEN }} https://ci.dev.pilot.indocresearch.org/job/Infra/job/UpdateAppVersion/buildWithParameters --data TF_TARGET_ENV=dev --data TARGET_RELEASE=auth --data NEW_APP_VERSION="$short_commit_SHA" | grep location | cut -d " " -f2) && echo $location
+        run: location=$(curl -i -X POST -m 60 -L --user jenkins:${{ secrets.JENKINS_API_TOKEN }} https://ci.dev.pilot.indocresearch.org/job/Infra/job/UpdateAppVersion/buildWithParameters --data TF_TARGET_ENV=dev --data TARGET_RELEASE=auth --data NEW_APP_VERSION="${{ env.SHA }}" | grep location | cut -d " " -f2) && echo "$location/api/json" && echo "location_link=$location/api/json" >> $GITHUB_ENV
+      - name: getting the build number
+        run: build_number=$(curl --silent --user jenkins:${{ secrets.JENKINS_API_TOKEN }} -X GET "${{ env.location_link }} | grep -Eo '"number"[^,]*' | grep -Eo '[^:]*$'") && echo $build_number && echo "build_number=$build_number" >> $GITHUB_ENV
+      - name: getting the result of the pipeline
+        run: |
+         timer=0;
+         timeout=30;
+         step=5;
+         echo "https://ci.dev.pilot.indocresearch.org/job/Infra/job/UpdateAppVersion/${{ env.build_number }}/api/json"
+         result=$(curl --silent --user jenkins:${{ secrets.JENKINS_API_TOKEN }} -X GET "https://ci.dev.pilot.indocresearch.org/job/Infra/job/UpdateAppVersion/${{ env.build_number }}/api/json" | grep -Eo '"result"[^,]*' | grep -Eo '[^:]*$' |  tr -d '"')
+         while [[ "$result" != "SUCCESS" && "$result" != "FAILURE" && $time -lt $timeout ]]; do result=$(curl --silent --user jenkins:${{ secrets.JENKINS_API_TOKEN }} -X GET "https://ci.dev.pilot.indocresearch.org/job/Infra/job/UpdateAppVersion/${{ env.build_number }}/api/json" | grep -Eo '"result"[^,]*' | grep -Eo '[^:]*$' |  tr -d '"') && sleep $step && ((timer=timer+step)) && echo "result=$result on $timer seconds"; done
+         if [ "$result" != "SUCCESS" ]; then exit 1; fi
