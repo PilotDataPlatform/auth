@@ -1,10 +1,6 @@
 name: Trigger Jenkins
 
 on:
-  push:
-    branches: [ develop ]
-  pull_request:
-    branches: [ main, develop ]
   workflow_run:
     workflows: ["Build and Publish"]
     types:
@@ -12,13 +8,14 @@ on:
 
 jobs:
   Trigger:
-    #if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: Trigger jenkins job
     runs-on: ubuntu-latest
     steps:
       - name: echo commit sha
-        # run:  full_commit_SHA="${{ github.event.workflow_run.head_sha }}" && short_commit_SHA=$(echo "${full_commit_SHA:0:7}") && echo "SHA=$short_commit_SHA" >> $GITHUB_ENV
-        run:  full_commit_SHA="${{ github.sha }}" && short_commit_SHA=$(echo "${full_commit_SHA:0:7}") && echo "SHA=$short_commit_SHA" >> $GITHUB_ENV
+        run:  full_commit_SHA="${{ github.event.workflow_run.head_sha }}" && short_commit_SHA=$(echo "${full_commit_SHA:0:7}") && echo "SHA=$short_commit_SHA" >> $GITHUB_ENV
+        # getting commit_SHA for when this job has been trigger by push (not workflow_run)
+        # run:  full_commit_SHA="${{ github.sha }}" && short_commit_SHA=$(echo "${full_commit_SHA:0:7}") && echo "SHA=$short_commit_SHA" >> $GITHUB_ENV
       - name: trigger the jenkins pipeline with curl
         run: |
           target_release=auth
@@ -30,16 +27,12 @@ jobs:
         run: |
           sleep 10
           curl --silent -o output.json --user jenkins:${{ secrets.JENKINS_API_TOKEN }} -X GET "${{ env.location_link }}"
-          cat output.json
       - name: getting the build number
         uses: sergeysova/jq-action@v2
         id: build_number
         with:
           cmd: |
-            ls && pwd
-            echo "------------"
             cd /github/workspace
-            ls && cat output.json
             build_num=$(jq .executable.number output.json -r)
             echo $build_num && echo "build_number=$build_num" >> $GITHUB_ENV
 
