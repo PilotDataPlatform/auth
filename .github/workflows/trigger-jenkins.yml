@@ -29,7 +29,7 @@ jobs:
       - name: getting the json
         run: |
           sleep 1
-          curl --silent --user -o output.json jenkins:${{ secrets.JENKINS_API_TOKEN }} -X GET "${{ env.location_link }}"
+          curl --silent -o output.json --user jenkins:${{ secrets.JENKINS_API_TOKEN }} -X GET "${{ env.location_link }}"
           cat output.json && pwd
       - name: getting the build number
         uses: sergeysova/jq-action@v2
