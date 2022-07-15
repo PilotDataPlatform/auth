@@ -19,6 +19,7 @@ from app.routers import accounts, ops_admin, ops_user, user_account_management
 from app.routers.invitation import invitation
 from app.routers.permissions import permissions
 from app.routers.event import event
+from app.routers.health import health
 
 
 def api_registry(app: FastAPI):
@@ -30,3 +31,4 @@ def api_registry(app: FastAPI):
     app.include_router(ops_admin.router, prefix='/v1')
     app.include_router(invitation.router, prefix='/v1')
     app.include_router(event.router, prefix='/v1')
+    app.include_router(health.router, prefix='/v1')

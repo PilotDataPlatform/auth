@@ -17,7 +17,7 @@ from functools import lru_cache
 from typing import Any, Dict, Optional
 
 from common import VaultClient
-from pydantic import BaseModel, BaseSettings, Extra
+from pydantic import BaseSettings, Extra
 
 
 class VaultConfig(BaseSettings):
@@ -45,12 +45,6 @@ def load_vault_settings(settings: BaseSettings) -> Dict[str, Any]:
     return client.get_from_vault(config.APP_NAME)
 
 
-class FlaskConfig(BaseModel):
-    """Store flask related configuration."""
-
-    JWT_AUTH_URL_RULE: Optional[str] = None
-
-
 class Settings(BaseSettings):
     """Store service configuration settings."""
 
@@ -61,7 +55,7 @@ class Settings(BaseSettings):
     env: str = ''
     namespace: str = ''
 
-    EMAIL_SERVICE: str
+    NOTIFY_SERVICE: str
     PROJECT_SERVICE: str
 
     EMAIL_SUPPORT: str
@@ -86,12 +80,9 @@ class Settings(BaseSettings):
     RDS_DBNAME: str
     RDS_USER: str
     RDS_PWD: str
-    RDS_SCHEMA_DEFAULT: str
-    RDS_DB_URI: str
     RDS_SCHEMA_PREFIX: str
 
     # Keycloak config
-    KEYCLOAK_GRANT_TYPE: str
     KEYCLOAK_ID: str
     KEYCLOAK_SERVER_URL: str
     KEYCLOAK_CLIENT_ID: str
@@ -123,8 +114,6 @@ class Settings(BaseSettings):
     REDIS_PORT: str
     REDIS_PASSWORD: str
 
-    FLASK: FlaskConfig = FlaskConfig()
-
     class Config:
         env_file = '.env'
         env_file_encoding = 'utf-8'
@@ -136,8 +125,9 @@ class Settings(BaseSettings):
 
     def __init__(self, *args: Any, **kwds: Any) -> None:
         super().__init__(*args, **kwds)
-        self.EMAIL_SERVICE += '/v1/email/'
+        self.NOTIFY_SERVICE += '/v1/'
         self.REDIS_URL = f"redis://:{self.REDIS_PASSWORD}@{self.REDIS_HOST}:{self.REDIS_PORT}"
+        self.RDS_DB_URI = f"postgresql://{self.RDS_USER}:{self.RDS_PWD}@{self.RDS_HOST}:{self.RDS_PORT}/{self.RDS_DBNAME}"
 
 
 @lru_cache(1)
