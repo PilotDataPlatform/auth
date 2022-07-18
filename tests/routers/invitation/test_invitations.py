@@ -174,7 +174,7 @@ def test_create_invitation_exists_in_ad(test_client, httpx_mock, ldap_mock, ops_
     mocker.patch.object(ProjectClient, 'get', return_value=FakeProjectObject())
 
     httpx_mock.add_response(
-        method='POST', url=ConfigSettings.EMAIL_SERVICE, json={'result': 'success'}, status_code=200
+        method='POST', url=ConfigSettings.NOTIFY_SERVICE + 'email', json={'result': 'success'}, status_code=200
     )
     payload = {
         'email': 'test1@example.com',
@@ -195,7 +195,7 @@ def test_create_invitation_no_ad(test_client, httpx_mock, ldap_mock, ops_admin_m
     mocker.patch.object(ProjectClient, 'get', return_value=FakeProjectObject())
 
     httpx_mock.add_response(
-        method='POST', url=ConfigSettings.EMAIL_SERVICE, json={'result': 'success'}, status_code=200
+        method='POST', url=ConfigSettings.NOTIFY_SERVICE + 'email', json={'result': 'success'}, status_code=200
     )
     payload = {
         'email': 'test2@example.com',
@@ -214,7 +214,7 @@ def test_create_invitation_no_ad(test_client, httpx_mock, ldap_mock, ops_admin_m
 def test_create_invitation_no_relation(test_client, httpx_mock, ldap_mock_no_user, ops_admin_mock_no_user, mocker):
     mocker.patch.object(ProjectClient, 'get', return_value=FakeProjectObject())
     httpx_mock.add_response(
-        method='POST', url=ConfigSettings.EMAIL_SERVICE, json={'result': 'success'}, status_code=200
+        method='POST', url=ConfigSettings.NOTIFY_SERVICE + 'email', json={'result': 'success'}, status_code=200
     )
     payload = {'email': 'test3@example.com', 'platform_role': 'member', 'invited_by': 'admin'}
     response = test_client.post('/v1/invitations', json=payload)
@@ -224,7 +224,7 @@ def test_create_invitation_no_relation(test_client, httpx_mock, ldap_mock_no_use
 def test_create_invitation_admin(test_client, httpx_mock, ldap_mock_no_user, ops_admin_mock_no_user, mocker):
     mocker.patch.object(ProjectClient, 'get', return_value=FakeProjectObject())
     httpx_mock.add_response(
-        method='POST', url=ConfigSettings.EMAIL_SERVICE, json={'result': 'success'}, status_code=200
+        method='POST', url=ConfigSettings.NOTIFY_SERVICE + 'email', json={'result': 'success'}, status_code=200
     )
     payload = {'email': 'test4@example.com', 'platform_role': 'admin', 'invited_by': 'admin'}
     response = test_client.post('/v1/invitations', json=payload)
@@ -268,7 +268,7 @@ def test_create_invitation_not_in_ad(
     mocker.patch.object(ProjectClient, 'get', return_value=FakeProjectObject())
 
     httpx_mock.add_response(
-        method='POST', url=ConfigSettings.EMAIL_SERVICE, json={'result': 'success'}, status_code=200
+        method='POST', url=ConfigSettings.NOTIFY_SERVICE + 'email', json={'result': 'success'}, status_code=200
     )
     payload = {
         'email': 'test3@example.com',
@@ -316,7 +316,7 @@ def test_get_invite_list_filter(test_client, httpx_mock):
 def test_get_invite_list_order(test_client, httpx_mock, ldap_mock, ops_admin_mock_no_user):
     timestamp = time.time()
     httpx_mock.add_response(
-        method='POST', url=ConfigSettings.EMAIL_SERVICE, json={'result': 'success'}, status_code=200
+        method='POST', url=ConfigSettings.NOTIFY_SERVICE + 'email', json={'result': 'success'}, status_code=200
     )
     payload = {'email': f'a@ordertest_{timestamp}.com', 'platform_role': 'admin', 'invited_by': 'admin'}
     response = test_client.post('/v1/invitations', json=payload)
@@ -401,7 +401,7 @@ def test_check_invite_no_user(test_client, httpx_mock, ops_admin_mock_no_user):
 @pytest.mark.dependency(name='create_for_update')
 def test_invite_create_for_update(test_client, httpx_mock, ldap_mock, ops_admin_mock_no_user):
     httpx_mock.add_response(
-        method='POST', url=ConfigSettings.EMAIL_SERVICE, json={'result': 'success'}, status_code=200
+        method='POST', url=ConfigSettings.NOTIFY_SERVICE + 'email', json={'result': 'success'}, status_code=200
     )
     payload = {'email': 'event@test.com', 'platform_role': 'admin', 'invited_by': 'admin'}
     response = test_client.post('/v1/invitations', json=payload)
