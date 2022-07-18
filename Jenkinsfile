@@ -53,7 +53,7 @@ pipeline {
     stage('DEV Remove image') {
       when {branch "develop"}
       steps{
-        sh "docker rmi $imagename_dev:$commit"
+        sh "docker rmi $imagename_dev:$commit-CAC"
       }
     }
 
