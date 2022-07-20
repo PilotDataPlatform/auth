@@ -7,39 +7,13 @@ services:
       - 5061:5061
     environment:
       port: 5061
-      RDS_DB_URI: "postgresql://postgres:postgres@db:5432/auth"
+      RDS_HOST: "db"
+      RDS_PORT: "5432"
+      RDS_DBNAME: "auth"
+      RDS_USER: "postgres"
+      RDS_PWD: "postgres"
       RDS_SCHEMA_PREFIX: "pilot"
       RDS_SCHEMA_DEFAULT: "pilot"
-      CONFIG_CENTER_ENABLED: False
-      DOMAIN_NAME: ""
-      INVITATION_URL_LOGIN: ""
-      REDIS_HOST: ""
-      REDIS_PORT: ""
-      REDIS_PASSWORD: ""
-      EMAIL_SERVICE: ""
-      PROJECT_SERVICE: ""
-      EMAIL_SUPPORT: ""
-      EMAIL_ADMIN: ""
-      EMAIL_HELPDESK: ""
-      ENABLE_ACTIVE_DIRECTORY: false
-      LDAP_COMMON_NAME_PREFIX: ""
-      LDAP_URL: ""
-      LDAP_ADMIN_DN: ""
-      LDAP_ADMIN_SECRET: ""
-      LDAP_OU: ""
-      LDAP_DC1: ""
-      LDAP_DC2: ""
-      LDAP_objectclass: ""
-      LDAP_USER_GROUP: ""
-      LDAP_COMMON_NAME_PREFIX: ""
-      AD_USER_GROUP: ""
-      AD_ADMIN_GROUP: ""
-      KEYCLOAK_GRANT_TYPE: ""
-      KEYCLOAK_ID: ""
-      KEYCLOAK_SERVER_URL: ""
-      KEYCLOAK_CLIENT_ID: ""
-      KEYCLOAK_SECRET: ""
-      KEYCLOAK_REALM: ""
     env_file:
       - .env
     volumes:
@@ -69,39 +43,13 @@ services:
     build:
       target: alembic-image
     environment:
-      RDS_DB_URI: "postgresql://postgres:postgres@db:5432/auth"
+      RDS_HOST: "db"
+      RDS_PORT: "5432"
+      RDS_DBNAME: "auth"
+      RDS_USER: "postgres"
+      RDS_PWD: "postgres"
       RDS_SCHEMA_PREFIX: "pilot"
       RDS_SCHEMA_DEFAULT: "pilot"
-      CONFIG_CENTER_ENABLED: False
-      DOMAIN_NAME: ""
-      INVITATION_URL_LOGIN: ""
-      REDIS_HOST: ""
-      REDIS_PORT: ""
-      REDIS_PASSWORD: ""
-      EMAIL_SERVICE: ""
-      PROJECT_SERVICE: ""
-      EMAIL_SUPPORT: ""
-      EMAIL_ADMIN: ""
-      EMAIL_HELPDESK: ""
-      ENABLE_ACTIVE_DIRECTORY: false
-      LDAP_COMMON_NAME_PREFIX: ""
-      LDAP_URL: ""
-      LDAP_ADMIN_DN: ""
-      LDAP_ADMIN_SECRET: ""
-      LDAP_OU: ""
-      LDAP_DC1: ""
-      LDAP_DC2: ""
-      LDAP_objectclass: ""
-      LDAP_USER_GROUP: ""
-      LDAP_COMMON_NAME_PREFIX: ""
-      AD_USER_GROUP: ""
-      AD_ADMIN_GROUP: ""
-      KEYCLOAK_GRANT_TYPE: ""
-      KEYCLOAK_ID: ""
-      KEYCLOAK_SERVER_URL: ""
-      KEYCLOAK_CLIENT_ID: ""
-      KEYCLOAK_SECRET: ""
-      KEYCLOAK_REALM: ""
     volumes:
       - .:/app
     env_file:
