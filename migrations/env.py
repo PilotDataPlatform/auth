@@ -9,6 +9,7 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 from app.models.sql_invitation import InvitationModel
+from app.config import ConfigSettings
 
 base_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append(base_dir)
@@ -28,9 +29,9 @@ if config.config_file_name is not None:
 # target_metadata = mymodel.Base.metadata
 target_metadata = InvitationModel.metadata
 
-if not os.environ.get('RDS_DB_URI'):
+if not ConfigSettings.RDS_DB_URI:
     raise Exception('Must set RDS_DB_URI environment var')
-config.set_main_option('sqlalchemy.url', os.environ.get('RDS_DB_URI'))
+config.set_main_option('sqlalchemy.url', ConfigSettings.RDS_DB_URI)
 
 
 # other values from the config, defined by the needs of env.py,
