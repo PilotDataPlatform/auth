@@ -1,4 +1,4 @@
-FROM python:3.9-buster
+FROM python:3.9-buster AS production-environment
 
 WORKDIR /usr/src/app
 
@@ -18,4 +18,21 @@ RUN poetry install --no-dev --no-root --no-interaction
 COPY . .
 RUN chmod +x gunicorn_starter.sh
 
+FROM production-environment AS auth-image
+
 CMD ["./gunicorn_starter.sh"]
+
+FROM production-environment AS development-environment
+
+RUN poetry install --no-root --no-interaction
+
+
+FROM development-environment AS alembic-image
+
+ENV ALEMBIC_CONFIG=alembic.ini
+
+COPY . .
+
+ENTRYPOINT ["python3", "-m", "alembic"]
+
+CMD ["upgrade", "head"]
