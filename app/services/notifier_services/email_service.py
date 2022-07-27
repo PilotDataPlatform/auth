@@ -55,7 +55,7 @@ class SrvEmail(metaclass=MetaService):
         if not template_kwargs:
             template_kwargs = {}
 
-        url = ConfigSettings.NOTIFY_SERVICE + 'email'
+        url = ConfigSettings.NOTIFY_SERVICE + 'email/'
         payload = {
             'subject': subject,
             'sender': sender,
